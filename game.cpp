@@ -2,13 +2,15 @@
 
 namespace gamestuff {
     Game::Game(void) : scores(0), 
-                       window(sf::VideoMode(FieldSize::WIDTH + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::HEIGHT + 2 * FieldSize::MARGIN), "Tetris") {
+                       window(sf::VideoMode(gamestuff::FieldSize::WIDTH + gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::MARGIN_RIGHT, gamestuff::FieldSize::HEIGHT + 2 * gamestuff::FieldSize::MARGIN), "Tetris") {
         this->createField();
     }
     Game::~Game() {
         
     }
     void Game::startGame(void) {
+        gamestuff::OBlock shape;
+        shape.draw(this->field);
         while ((this->window).isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -20,8 +22,9 @@ namespace gamestuff {
         }
     }
     void Game::createField(void) {
-        unsigned int cellsInCol = FieldSize::HEIGHT / FieldSize::CELL_SIZE;
-        unsigned int cellsInRow = FieldSize::WIDTH / FieldSize::CELL_SIZE;
+        //should clear if not empty?
+        unsigned int cellsInCol = gamestuff::FieldSize::HEIGHT / gamestuff::FieldSize::CELL_SIZE;
+        unsigned int cellsInRow = gamestuff::FieldSize::WIDTH / gamestuff::FieldSize::CELL_SIZE;
         for (unsigned int i = 0; i < cellsInCol; ++i) {
             (this->field).push_back({});
             for (unsigned int j = 0; j < cellsInRow; ++j) {
@@ -35,17 +38,19 @@ namespace gamestuff {
         (this->window).display();
     }
     void Game::drawFiled(void) {
-        sf::RectangleShape line;
-        line.setFillColor(sf::Color(81, 81, 81));
-        for (unsigned int i = 0; i <= FieldSize::HEIGHT / FieldSize::CELL_SIZE; ++i) {
-            line.setSize(sf::Vector2f(FieldSize::WIDTH, 1));
-            line.setPosition(sf::Vector2f(FieldSize::MARGIN, FieldSize::MARGIN + FieldSize::CELL_SIZE * i));
-            (this->window).draw(line);
-        }
-        for (unsigned int i = 0; i <= FieldSize::WIDTH / FieldSize::CELL_SIZE; ++i) {
-            line.setSize(sf::Vector2f(1, FieldSize::HEIGHT));
-            line.setPosition(sf::Vector2f(FieldSize::MARGIN + FieldSize::CELL_SIZE * i, FieldSize::MARGIN));
-            (this->window).draw(line);
+        sf::RectangleShape cell(sf::Vector2f(gamestuff::FieldSize::CELL_SIZE, gamestuff::FieldSize::CELL_SIZE));
+        cell.setOutlineColor(sf::Color(81, 81, 81));
+        cell.setOutlineThickness(1);
+        for (unsigned int i = 0; i < (this->field).size(); ++i) {
+            for (unsigned int j = 0; j < (this->field)[i].size(); ++j) {
+                cell.setPosition(sf::Vector2f(gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::CELL_SIZE * j, gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::CELL_SIZE * i));
+                if ((this->field)[i][j]) {
+                    cell.setFillColor(sf::Color::Cyan);
+                } else {
+                    cell.setFillColor(sf::Color::Transparent);
+                }
+                window.draw(cell);
+            }
         }
     }
-} //namespace gamestuff
+} // namespace gamestuff

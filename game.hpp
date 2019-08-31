@@ -7,6 +7,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "shape.hpp"
 
 namespace gamestuff {
     enum FieldSize {
@@ -28,6 +29,6 @@ namespace gamestuff {
         void redrawAndShow(void);
         void drawFiled(void);
     };
-} //namespace gamestuff
+} // namespace gamestuff
 
 #endif
