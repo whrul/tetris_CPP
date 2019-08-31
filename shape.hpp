@@ -4,7 +4,9 @@
 #define SHAPE_HPP
 
 #include <vector>
-#include "game.hpp"
+#include <cstdbool>
+#include <SFML/Graphics.hpp>
+#include <iostream>
 
 namespace gamestuff {
     enum ShapeSize {
@@ -15,12 +17,15 @@ namespace gamestuff {
       protected:
         int leftTopCornI;
         int leftTopCornJ;
-        std::vector<std::vector<unsigned char>> shapeMap;
+        std::vector<std::vector<unsigned int>> shapeMap;
       public:
         Shape(void);
         virtual ~Shape();
-        void draw(std::vector<std::vector<unsigned char>> &field) const;
+        void draw(std::vector<std::vector<sf::Color>> &field) const;
         virtual void rotate(void) = 0;
+        bool canFall(std::vector<std::vector<sf::Color>> &field) const;
+        void fall(std::vector<std::vector<sf::Color>> &field);
+        void createNew(void);
     };
     class OBlock : public Shape {
       public:

@@ -19,15 +19,16 @@ namespace gamestuff {
     };
     class Game {
         unsigned int scores;
-        std::vector<std::vector<unsigned char>> field;
+        std::vector<std::vector<sf::Color>> field;
         sf::RenderWindow window;
+        gamestuff::Shape *fallingShape; //bad alloc except
+        void createField(void);
+        void redrawAndShow(void);
+        void drawFiled(void);
       public:
         Game(void);
         ~Game();
         void startGame(void);
-        void createField(void);
-        void redrawAndShow(void);
-        void drawFiled(void);
     };
 } // namespace gamestuff
 

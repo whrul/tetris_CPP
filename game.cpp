@@ -4,13 +4,12 @@ namespace gamestuff {
     Game::Game(void) : scores(0), 
                        window(sf::VideoMode(gamestuff::FieldSize::WIDTH + gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::MARGIN_RIGHT, gamestuff::FieldSize::HEIGHT + 2 * gamestuff::FieldSize::MARGIN), "Tetris") {
         this->createField();
+        this->fallingShape = new gamestuff::OBlock;
     }
     Game::~Game() {
-        
+        delete this->fallingShape;
     }
     void Game::startGame(void) {
-        gamestuff::OBlock shape;
-        shape.draw(this->field);
         while ((this->window).isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -28,13 +27,24 @@ namespace gamestuff {
         for (unsigned int i = 0; i < cellsInCol; ++i) {
             (this->field).push_back({});
             for (unsigned int j = 0; j < cellsInRow; ++j) {
-                (this->field)[i].push_back(0);
+                (this->field)[i].push_back(sf::Color::Transparent);
             }
         }
     }
     void Game::redrawAndShow(void) {
+        static sf::Clock clock;
         (this->window).clear(sf::Color::Black);
         this->drawFiled();
+        if (clock.getElapsedTime().asMilliseconds() > 500) {
+            if (this->fallingShape->canFall(this->field)) {
+                this->fallingShape->fall(this->field);
+                this->fallingShape->draw(this->field);
+            } else {
+                this->fallingShape->draw(this->field);
+                this->fallingShape->createNew();
+            }
+            clock.restart();
+        }
         (this->window).display();
     }
     void Game::drawFiled(void) {
@@ -44,11 +54,7 @@ namespace gamestuff {
         for (unsigned int i = 0; i < (this->field).size(); ++i) {
             for (unsigned int j = 0; j < (this->field)[i].size(); ++j) {
                 cell.setPosition(sf::Vector2f(gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::CELL_SIZE * j, gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::CELL_SIZE * i));
-                if ((this->field)[i][j]) {
-                    cell.setFillColor(sf::Color::Cyan);
-                } else {
-                    cell.setFillColor(sf::Color::Transparent);
-                }
+                cell.setFillColor((this->field)[i][j]);
                 window.draw(cell);
             }
         }
