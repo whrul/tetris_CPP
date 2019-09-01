@@ -50,9 +50,37 @@ namespace gamestuff {
         }
         ++(this->leftTopCornI);
     }
-    void Shape::createNew(void) {
-        this->leftTopCornI = 0;
-        this->leftTopCornJ = 0;
+    bool Shape::canMoveSide(std::vector<std::vector<sf::Color>> &field, const int direction) const {
+        for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
+            for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j){
+                if (!(this->shapeMap)[i][j]) {
+                    continue;
+                }
+                bool isNearWall = (this->leftTopCornJ + j + direction >= field[0].size()) || (this->leftTopCornJ + j + direction < 0);
+                if (isNearWall) {
+                    return false;
+                }
+                bool isNearBlocks = field[this->leftTopCornI + i][this->leftTopCornJ + j + direction] != sf::Color::Transparent &&
+                                  (j + direction < 0 || j + direction >= gamestuff::ShapeSize::CELLS_IN_ROW || !((this->shapeMap)[i][j + direction]));
+                if (isNearBlocks) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    void Shape::moveSide(std::vector<std::vector<sf::Color>> &field, const int direction) {
+        if (!(this->canMoveSide(field, direction))) {    
+            return;
+        }
+        for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
+            for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j){
+                if ((this->shapeMap)[i][j]) {
+                    field[this->leftTopCornI + i][this->leftTopCornJ + j] = sf::Color::Transparent;
+                }
+            }
+        }
+        this->leftTopCornJ += direction;
     }
     OBlock::OBlock(void){
         if ((gamestuff::ShapeSize::CELLS_IN_COL) > 1 && gamestuff::ShapeSize::CELLS_IN_ROW > 1) {

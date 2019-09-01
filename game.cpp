@@ -16,6 +16,15 @@ namespace gamestuff {
                 if (event.type == sf::Event::Closed) {
                     window.close();
                 }
+                if (event.type == sf::Event::KeyPressed) {
+                    if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) {
+                        this->fallingShape->moveSide(this->field, 1);
+                        this->fallingShape->draw(this->field);
+                    } else if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) {
+                        this->fallingShape->moveSide(this->field, -1);
+                        this->fallingShape->draw(this->field);
+                    }
+                }
             }
             this->redrawAndShow();
         }
@@ -34,20 +43,20 @@ namespace gamestuff {
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
         (this->window).clear(sf::Color::Black);
-        this->drawFiled();
         if (clock.getElapsedTime().asMilliseconds() > 500) {
             if (this->fallingShape->canFall(this->field)) {
                 this->fallingShape->fall(this->field);
                 this->fallingShape->draw(this->field);
             } else {
                 this->fallingShape->draw(this->field);
-                this->fallingShape->createNew();
+                this->createNewShape();
             }
             clock.restart();
         }
+        this->drawField();
         (this->window).display();
     }
-    void Game::drawFiled(void) {
+    void Game::drawField(void) {
         sf::RectangleShape cell(sf::Vector2f(gamestuff::FieldSize::CELL_SIZE, gamestuff::FieldSize::CELL_SIZE));
         cell.setOutlineColor(sf::Color(81, 81, 81));
         cell.setOutlineThickness(1);
@@ -58,5 +67,9 @@ namespace gamestuff {
                 window.draw(cell);
             }
         }
+    }
+    void Game::createNewShape(void) {
+        delete this->fallingShape;
+        this->fallingShape = new gamestuff::OBlock;
     }
 } // namespace gamestuff

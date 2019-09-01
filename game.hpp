@@ -24,7 +24,8 @@ namespace gamestuff {
         gamestuff::Shape *fallingShape; //bad alloc except
         void createField(void);
         void redrawAndShow(void);
-        void drawFiled(void);
+        void drawField(void);
+        void createNewShape(void);
       public:
         Game(void);
         ~Game();

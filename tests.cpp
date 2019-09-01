@@ -5,7 +5,10 @@ namespace gamestuff {
         Tests::checkFieldAndShapesSizes();
     }
     void Tests::checkFieldAndShapesSizes(void) {
-        assert(gamestuff::ShapeSize::CELLS_IN_COL < gamestuff::FieldSize::HEIGHT / gamestuff::FieldSize::CELL_SIZE &&
+        assert(gamestuff::FieldSize::CELL_SIZE > 0 &&
+               gamestuff::ShapeSize::CELLS_IN_COL > 0 &&
+               gamestuff::ShapeSize::CELLS_IN_ROW > 0 &&
+               gamestuff::ShapeSize::CELLS_IN_COL < gamestuff::FieldSize::HEIGHT / gamestuff::FieldSize::CELL_SIZE &&
                gamestuff::ShapeSize::CELLS_IN_ROW < gamestuff::FieldSize::WIDTH / gamestuff::FieldSize::CELL_SIZE);
         std::cout << "checkFieldAndShapesSizes() passed.\n";
     }
