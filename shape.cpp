@@ -86,20 +86,44 @@ namespace gamestuff {
         this->draw(field);
         return true;
     }
+    void Shape::setPosition(int leftTopCornerI, int leftTopCornerJ) {
+        this -> leftTopCornI = leftTopCornerI;
+        this -> leftTopCornJ = leftTopCornerJ;
+    }
     OBlock::OBlock(int leftTopCornerI, int leftTopCornerJ) : Shape(leftTopCornerI, leftTopCornerJ){
         if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 1 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 1) {
-            for (unsigned int i = 0; i < 2; ++i) {
-                (this->shapeMap).push_back({});
-                for (unsigned int j = 0; j < 2; ++j) {
-                    (this->shapeMap)[i].push_back(1);
-                }
-            }
+            (this->shapeMap).push_back({1, 1});
+            (this->shapeMap).push_back({1, 1});
         }
     }
     OBlock::~OBlock() {
 
     }
     void OBlock::rotate(void) {
+        return;
+    }
+    TBlock::TBlock(int leftTopCornerI, int leftTopCornerJ) : Shape(leftTopCornerI, leftTopCornerJ){
+        if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 1 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 2) {
+            (this->shapeMap).push_back({0, 1, 0});
+            (this->shapeMap).push_back({1, 1, 1});
+        }
+    }
+    TBlock::~TBlock() {
+
+    }
+    void TBlock::rotate(void) {
+        return;
+    }
+    ZBlock::ZBlock(int leftTopCornerI, int leftTopCornerJ) : Shape(leftTopCornerI, leftTopCornerJ){
+        if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 1 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 2) {
+            (this->shapeMap).push_back({1, 1, 0});
+            (this->shapeMap).push_back({0, 1, 1});
+        }
+    }
+    ZBlock::~ZBlock() {
+
+    }
+    void ZBlock::rotate(void) {
         return;
     }
 } // namespace gamestuff

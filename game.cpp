@@ -4,11 +4,15 @@ namespace gamestuff {
     Game::Game(void) : scores(0), 
                        window(sf::VideoMode(gamestuff::FieldSize::WIDTH + gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::MARGIN_RIGHT, gamestuff::FieldSize::HEIGHT + 2 * gamestuff::FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr) {
+        srand(time(NULL));
         this->createField();
-        this->createNewShape();
+        this->createShapes();
+        this->chooseNewShape();
     }
     Game::~Game() {
-        delete this->fallingShape;
+        for (int i = (this->shapes).size() - 1; i >= 0; --i) {
+            delete (this->shapes)[i];
+        }
     }
     void Game::startGame(void) {
         while ((this->window).isOpen()) {
@@ -44,7 +48,7 @@ namespace gamestuff {
         (this->window).clear(sf::Color::Black);
         if (clock.getElapsedTime().asMilliseconds() > 200) {
             if (!this->fallingShape->fall(field)) {
-                this->createNewShape();
+                this->chooseNewShape();
             }
             clock.restart();
         }
@@ -64,9 +68,9 @@ namespace gamestuff {
             }
         }
     }
-    void Game::createNewShape(void) {
-        delete this->fallingShape;
-        this->fallingShape = new gamestuff::OBlock(0, 0);
+    void Game::chooseNewShape(void) {
+        this->fallingShape = (this->shapes)[rand() % (this->shapes).size()];
+        this->fallingShape->setPosition(0,0);
     }
     void Game::removeFullLines(void) {
         this->fallingShape->hide(this->field);
@@ -89,5 +93,10 @@ namespace gamestuff {
             }
         }
         this->fallingShape->draw(this->field);
+    }
+    void Game::createShapes(void) {
+        (this->shapes).push_back(new gamestuff::OBlock);
+        (this->shapes).push_back(new gamestuff::TBlock);
+        (this->shapes).push_back(new gamestuff::ZBlock);
     }
 } // namespace gamestuff
