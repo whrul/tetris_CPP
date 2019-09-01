@@ -22,7 +22,7 @@ namespace gamestuff {
         bool canMoveSide(const std::list<std::vector<sf::Color>> &field, const int direction) const;
         bool canFall(const std::list<std::vector<sf::Color>> &field) const;
       public:
-        Shape(void);
+        Shape(int leftTopCornerI, int leftTopCornerJ);
         virtual ~Shape();
         void draw(std::list<std::vector<sf::Color>> &field) const;
         void hide(std::list<std::vector<sf::Color>> &field) const;
@@ -33,7 +33,7 @@ namespace gamestuff {
     };
     class OBlock : public Shape {
       public:
-        OBlock(void);
+        OBlock(int leftTopCornerI = 0, int leftTopCornerJ = 0);
         ~OBlock();
         void rotate(void) override;
     };

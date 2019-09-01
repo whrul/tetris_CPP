@@ -1,7 +1,7 @@
 #include "shape.hpp"
 
 namespace gamestuff {
-    Shape::Shape(void) : leftTopCornI(0), leftTopCornJ(0) {
+    Shape::Shape(int leftTopCornerI, int leftTopCornerJ) : leftTopCornI(leftTopCornerI), leftTopCornJ(leftTopCornerJ) {
         for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
             (this->shapeMap).push_back({});
             for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j) {
@@ -86,7 +86,7 @@ namespace gamestuff {
         this->draw(field);
         return true;
     }
-    OBlock::OBlock(void){
+    OBlock::OBlock(int leftTopCornerI, int leftTopCornerJ) : Shape(leftTopCornerI, leftTopCornerJ){
         if ((gamestuff::ShapeSize::CELLS_IN_COL) > 1 && gamestuff::ShapeSize::CELLS_IN_ROW > 1) {
             (this->shapeMap)[gamestuff::ShapeSize::CELLS_IN_COL - 2][0] = 1;
             (this->shapeMap)[gamestuff::ShapeSize::CELLS_IN_COL - 2][1] = 1;
