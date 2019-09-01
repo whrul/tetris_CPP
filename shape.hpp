@@ -3,6 +3,7 @@
 #ifndef SHAPE_HPP
 #define SHAPE_HPP
 
+#include<list>
 #include <vector>
 #include <cstdbool>
 #include <SFML/Graphics.hpp>
@@ -18,17 +19,17 @@ namespace gamestuff {
         int leftTopCornI;
         int leftTopCornJ;
         std::vector<std::vector<unsigned int>> shapeMap;
-        bool canMoveSide(const std::vector<std::vector<sf::Color>> &field, const int direction) const;
-        bool canFall(const std::vector<std::vector<sf::Color>> &field) const;
+        bool canMoveSide(const std::list<std::vector<sf::Color>> &field, const int direction) const;
+        bool canFall(const std::list<std::vector<sf::Color>> &field) const;
       public:
         Shape(void);
         virtual ~Shape();
-        void draw(std::vector<std::vector<sf::Color>> &field) const;
-        void hide(std::vector<std::vector<sf::Color>> &field) const;
+        void draw(std::list<std::vector<sf::Color>> &field) const;
+        void hide(std::list<std::vector<sf::Color>> &field) const;
         virtual void rotate(void) = 0;
         
-        bool fall(std::vector<std::vector<sf::Color>> &field);
-        bool moveSide(std::vector<std::vector<sf::Color>> &field, const int direction);
+        bool fall(std::list<std::vector<sf::Color>> &field);
+        bool moveSide(std::list<std::vector<sf::Color>> &field, const int direction);
     };
     class OBlock : public Shape {
       public:

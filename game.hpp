@@ -3,6 +3,7 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include <list>
 #include <vector>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
@@ -19,7 +20,7 @@ namespace gamestuff {
     };
     class Game {
         unsigned int scores;
-        std::vector<std::vector<sf::Color>> field;
+        std::list<std::vector<sf::Color>> field;
         sf::RenderWindow window;
         gamestuff::Shape *fallingShape; //bad alloc except
         void createField(void);
