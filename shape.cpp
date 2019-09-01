@@ -95,7 +95,7 @@ namespace gamestuff {
                     this->leftTopCornI + i >= field.size() ||
                     this->leftTopCornJ + j < 0 ||
                     this->leftTopCornJ + j >= (*std::next(field.begin(), i)).size() ||
-                    (*std::next((field).begin(), i))[j] != sf::Color::Transparent) {
+                    (*std::next((field).begin(), this->leftTopCornI + i))[this->leftTopCornJ + j] != sf::Color::Transparent) {
                     this->draw(field);
                     return false;           
                 }

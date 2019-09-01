@@ -49,7 +49,7 @@ namespace gamestuff {
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
         (this->window).clear(sf::Color::Black);
-        if (clock.getElapsedTime().asMilliseconds() > 300) {
+        if (clock.getElapsedTime().asMilliseconds() > 200) {
             if (!this->fallingShape->fall(field)) {
                 this->chooseNewShape();
             }
