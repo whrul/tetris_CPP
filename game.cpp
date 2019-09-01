@@ -26,6 +26,8 @@ namespace gamestuff {
                         this->fallingShape->moveSide(this->field, 1);
                     } else if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) {
                         this->fallingShape->moveSide(this->field, -1);
+                    } else if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) {
+                        this->fallingShape->rotate(this->field);
                     }
                 }
             }
@@ -46,7 +48,7 @@ namespace gamestuff {
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
         (this->window).clear(sf::Color::Black);
-        if (clock.getElapsedTime().asMilliseconds() > 200) {
+        if (clock.getElapsedTime().asMilliseconds() > 300) {
             if (!this->fallingShape->fall(field)) {
                 this->chooseNewShape();
             }
