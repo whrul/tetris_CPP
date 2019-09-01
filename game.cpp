@@ -48,12 +48,17 @@ namespace gamestuff {
     }
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
+        static double actualStep = gamestuff::TimeSteps::START_STEP;
+        static double endStep = gamestuff::TimeSteps::END_STEP;
         (this->window).clear(sf::Color::Black);
-        if (clock.getElapsedTime().asMilliseconds() > 200) {
+        if (clock.getElapsedTime().asMilliseconds() > std::max(endStep, actualStep)) {
             if (!this->fallingShape->fall(field)) {
                 this->chooseNewShape();
             }
             clock.restart();
+            if(actualStep > 0) {
+                actualStep -= 0.25;
+            }
         }
         this->removeFullLines();
         this->drawField();

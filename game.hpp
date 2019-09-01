@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 #include "shape.hpp"
 
 namespace gamestuff {
@@ -19,6 +20,10 @@ namespace gamestuff {
         CELL_SIZE = 35,
         MARGIN = 80,
         MARGIN_RIGHT = 300,
+    };
+    enum TimeSteps {
+        START_STEP = 250,
+        END_STEP = 90,
     };
     class Game {
         unsigned int scores;
