@@ -1,7 +1,7 @@
 #include "shape.hpp"
 
 namespace gamestuff {
-    Shape::Shape(int leftTopCornerI, int leftTopCornerJ) : leftTopCornI(leftTopCornerI), leftTopCornJ(leftTopCornerJ) {
+    Shape::Shape(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : leftTopCornI(leftTopCornerI), leftTopCornJ(leftTopCornerJ), mainColor(color) {
     }
     Shape::~Shape() {
 
@@ -10,7 +10,7 @@ namespace gamestuff {
         for (unsigned int i = 0; i < (this->shapeMap).size(); ++i) {
             for (unsigned int j = 0; j < (this->shapeMap)[i].size(); ++j){
                 if ((this->shapeMap)[i][j]) {
-                    (*std::next(field.begin(), this->leftTopCornI + i))[this->leftTopCornJ + j] = sf::Color::Yellow;           
+                    (*std::next(field.begin(), this->leftTopCornI + i))[this->leftTopCornJ + j] = this->mainColor;           
                 }
             }
         }
@@ -125,36 +125,56 @@ namespace gamestuff {
         this->draw(field);
         return true;
     }
-    OBlock::OBlock(int leftTopCornerI, int leftTopCornerJ) : Shape(leftTopCornerI, leftTopCornerJ){
+    OBlock::OBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 1 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 1) {
             (this->shapeMap).push_back({1, 1});
             (this->shapeMap).push_back({1, 1});
         }
     }
-    OBlock::~OBlock() {
-
-    }
     bool OBlock::rotate(std::list<std::vector<sf::Color>> &field){
         return true;
     }
-    TBlock::TBlock(int leftTopCornerI, int leftTopCornerJ) : Shape(leftTopCornerI, leftTopCornerJ){
+    TBlock::TBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 2 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 2) {
             (this->shapeMap).push_back({0, 1, 0});
             (this->shapeMap).push_back({1, 1, 1});
             (this->shapeMap).push_back({0, 0, 0});
         }
     }
-    TBlock::~TBlock() {
-
-    }
-    ZBlock::ZBlock(int leftTopCornerI, int leftTopCornerJ) : Shape(leftTopCornerI, leftTopCornerJ){
+    ZBlock::ZBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 2 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 2) {
-            (this->shapeMap).push_back({0, 0, 0});
             (this->shapeMap).push_back({1, 1, 0});
             (this->shapeMap).push_back({0, 1, 1});
+            (this->shapeMap).push_back({0, 0, 0});
         }
     }
-    ZBlock::~ZBlock() {
-
+    SBlock::SBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
+        if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 2 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 2) {
+            (this->shapeMap).push_back({0, 1, 1});
+            (this->shapeMap).push_back({1, 1, 0});
+            (this->shapeMap).push_back({0, 0, 0});
+        }
+    }
+    JBlock::JBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
+        if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 2 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 2) {
+            (this->shapeMap).push_back({1, 0, 0});
+            (this->shapeMap).push_back({1, 1, 1});
+            (this->shapeMap).push_back({0, 0, 0});
+        }
+    }
+    LBlock::LBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
+        if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 2 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 2) {
+            (this->shapeMap).push_back({0, 0, 1});
+            (this->shapeMap).push_back({1, 1, 1});
+            (this->shapeMap).push_back({0, 0, 0});
+        }
+    }
+    IBlock::IBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
+        if ((gamestuff::ShapeSize::MAX_CELLS_IN_COL) > 3 && gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 3) {
+            (this->shapeMap).push_back({0, 0, 1, 0});
+            (this->shapeMap).push_back({0, 0, 1, 0});
+            (this->shapeMap).push_back({0, 0, 1, 0});
+            (this->shapeMap).push_back({0, 0, 1, 0});
+        }
     }
 } // namespace gamestuff

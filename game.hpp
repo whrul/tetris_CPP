@@ -14,10 +14,10 @@
 
 namespace gamestuff {
     enum FieldSize {
-        WIDTH = 500,
+        WIDTH = 400,
         HEIGHT = 800,
-        CELL_SIZE = 50,
-        MARGIN = 70,
+        CELL_SIZE = 35,
+        MARGIN = 80,
         MARGIN_RIGHT = 300,
     };
     class Game {
@@ -26,7 +26,7 @@ namespace gamestuff {
         sf::RenderWindow window;
         gamestuff::Shape *fallingShape;
         std::vector<gamestuff::Shape*> shapes; //bad alloc except
-        void createField(void);
+        void createField(void);//should clear if not empty?
         void redrawAndShow(void);
         void drawField(void);
         void chooseNewShape(void);

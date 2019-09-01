@@ -28,6 +28,8 @@ namespace gamestuff {
                         this->fallingShape->moveSide(this->field, -1);
                     } else if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) {
                         this->fallingShape->rotate(this->field);
+                    } else if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) {
+                        this->fallingShape->fall(this->field);
                     }
                 }
             }
@@ -35,7 +37,6 @@ namespace gamestuff {
         }
     }
     void Game::createField(void) {
-        //should clear if not empty?
         unsigned int cellsInCol = gamestuff::FieldSize::HEIGHT / gamestuff::FieldSize::CELL_SIZE;
         unsigned int cellsInRow = gamestuff::FieldSize::WIDTH / gamestuff::FieldSize::CELL_SIZE;
         for (unsigned int i = 0; i < cellsInCol; ++i) {
@@ -59,7 +60,7 @@ namespace gamestuff {
         (this->window).display();
     }
     void Game::drawField(void) {
-        sf::RectangleShape cell(sf::Vector2f(gamestuff::FieldSize::CELL_SIZE, gamestuff::FieldSize::CELL_SIZE));
+        static sf::RectangleShape cell(sf::Vector2f(gamestuff::FieldSize::CELL_SIZE, gamestuff::FieldSize::CELL_SIZE));
         cell.setOutlineColor(sf::Color(81, 81, 81));
         cell.setOutlineThickness(1);
         for (unsigned int i = 0; i < (this->field).size(); ++i) {
@@ -97,8 +98,12 @@ namespace gamestuff {
         this->fallingShape->draw(this->field);
     }
     void Game::createShapes(void) {
-        (this->shapes).push_back(new gamestuff::OBlock);
-        (this->shapes).push_back(new gamestuff::TBlock);
-        (this->shapes).push_back(new gamestuff::ZBlock);
+        (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Cyan));
+        (this->shapes).push_back(new gamestuff::TBlock(0, 0, sf::Color::Red));
+        (this->shapes).push_back(new gamestuff::ZBlock(0, 0, sf::Color::Yellow));
+        (this->shapes).push_back(new gamestuff::SBlock(0, 0, sf::Color::Blue));
+        (this->shapes).push_back(new gamestuff::JBlock(0, 0, sf::Color::Green));
+        (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
+        (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
     }
 } // namespace gamestuff
