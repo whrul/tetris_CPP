@@ -2,9 +2,10 @@
 
 namespace gamestuff {
     Game::Game(void) : scores(0), 
-                       window(sf::VideoMode(gamestuff::FieldSize::WIDTH + gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::MARGIN_RIGHT, gamestuff::FieldSize::HEIGHT + 2 * gamestuff::FieldSize::MARGIN), "Tetris") {
+                       window(sf::VideoMode(gamestuff::FieldSize::WIDTH + gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::MARGIN_RIGHT, gamestuff::FieldSize::HEIGHT + 2 * gamestuff::FieldSize::MARGIN), "Tetris"),
+                       fallingShape(nullptr) {
         this->createField();
-        this->fallingShape = new gamestuff::OBlock;
+        this->createNewShape();
     }
     Game::~Game() {
         delete this->fallingShape;
@@ -65,7 +66,7 @@ namespace gamestuff {
     }
     void Game::createNewShape(void) {
         delete this->fallingShape;
-        this->fallingShape = new gamestuff::OBlock;
+        this->fallingShape = new gamestuff::OBlock(0, 0);
     }
     void Game::removeFullLines(void) {
         this->fallingShape->hide(this->field);
