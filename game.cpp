@@ -66,7 +66,7 @@ namespace gamestuff {
     }
     void Game::createNewShape(void) {
         delete this->fallingShape;
-        this->fallingShape = new gamestuff::OBlock;
+        this->fallingShape = new gamestuff::OBlock(0, 0);
     }
     void Game::removeFullLines(void) {
         this->fallingShape->hide(this->field);

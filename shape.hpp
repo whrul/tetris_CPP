@@ -11,8 +11,8 @@
 
 namespace gamestuff {
     enum ShapeSize {
-        CELLS_IN_ROW = 4,
-        CELLS_IN_COL = 4,
+        MAX_CELLS_IN_ROW = 4,
+        MAX_CELLS_IN_COL = 4,
     };
     class Shape{
       protected:
