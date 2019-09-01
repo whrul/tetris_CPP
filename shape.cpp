@@ -21,7 +21,16 @@ namespace gamestuff {
             }
         }
     }
-    bool Shape::canFall(std::vector<std::vector<sf::Color>> &field) const {
+    void Shape::hide(std::vector<std::vector<sf::Color>> &field) const {
+        for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
+            for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j){
+                if ((this->shapeMap)[i][j]) {
+                    field[this->leftTopCornI + i][this->leftTopCornJ + j] = sf::Color::Transparent;
+                }
+            }
+        }
+    }
+    bool Shape::canFall(const std::vector<std::vector<sf::Color>> &field) const {
         for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
             for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j){
                 if (!(this->shapeMap)[i][j]) {
@@ -40,17 +49,16 @@ namespace gamestuff {
         }
         return true;
     }
-    void Shape::fall(std::vector<std::vector<sf::Color>> &field) {
-        for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
-            for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j){
-                if ((this->shapeMap)[i][j]) {
-                    field[this->leftTopCornI + i][this->leftTopCornJ + j] = sf::Color::Transparent;
-                }
-            }
+    bool Shape::fall(std::vector<std::vector<sf::Color>> &field) {
+        if (!(this->canFall(field))) {
+            return false;
         }
+        this->hide(field);
         ++(this->leftTopCornI);
+        this->draw(field);
+        return true;
     }
-    bool Shape::canMoveSide(std::vector<std::vector<sf::Color>> &field, const int direction) const {
+    bool Shape::canMoveSide(const std::vector<std::vector<sf::Color>> &field, const int direction) const {
         for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
             for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j){
                 if (!(this->shapeMap)[i][j]) {
@@ -69,18 +77,14 @@ namespace gamestuff {
         }
         return true;
     }
-    void Shape::moveSide(std::vector<std::vector<sf::Color>> &field, const int direction) {
+    bool Shape::moveSide(std::vector<std::vector<sf::Color>> &field, const int direction) {
         if (!(this->canMoveSide(field, direction))) {    
-            return;
+            return false;
         }
-        for (unsigned int i = 0; i < gamestuff::ShapeSize::CELLS_IN_COL; ++i) {
-            for (unsigned int j = 0; j < gamestuff::ShapeSize::CELLS_IN_ROW; ++j){
-                if ((this->shapeMap)[i][j]) {
-                    field[this->leftTopCornI + i][this->leftTopCornJ + j] = sf::Color::Transparent;
-                }
-            }
-        }
+        this->hide(field);
         this->leftTopCornJ += direction;
+        this->draw(field);
+        return true;
     }
     OBlock::OBlock(void){
         if ((gamestuff::ShapeSize::CELLS_IN_COL) > 1 && gamestuff::ShapeSize::CELLS_IN_ROW > 1) {

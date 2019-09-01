@@ -18,15 +18,17 @@ namespace gamestuff {
         int leftTopCornI;
         int leftTopCornJ;
         std::vector<std::vector<unsigned int>> shapeMap;
-        bool canMoveSide(std::vector<std::vector<sf::Color>> &field, const int direction) const;
+        bool canMoveSide(const std::vector<std::vector<sf::Color>> &field, const int direction) const;
+        bool canFall(const std::vector<std::vector<sf::Color>> &field) const;
       public:
         Shape(void);
         virtual ~Shape();
         void draw(std::vector<std::vector<sf::Color>> &field) const;
+        void hide(std::vector<std::vector<sf::Color>> &field) const;
         virtual void rotate(void) = 0;
-        bool canFall(std::vector<std::vector<sf::Color>> &field) const;
-        void fall(std::vector<std::vector<sf::Color>> &field);
-        void moveSide(std::vector<std::vector<sf::Color>> &field, const int direction);
+        
+        bool fall(std::vector<std::vector<sf::Color>> &field);
+        bool moveSide(std::vector<std::vector<sf::Color>> &field, const int direction);
     };
     class OBlock : public Shape {
       public:

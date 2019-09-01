@@ -11,7 +11,7 @@
 
 namespace gamestuff {
     enum FieldSize {
-        WIDTH = 550,
+        WIDTH = 500,
         HEIGHT = 800,
         CELL_SIZE = 50,
         MARGIN = 70,
@@ -26,6 +26,7 @@ namespace gamestuff {
         void redrawAndShow(void);
         void drawField(void);
         void createNewShape(void);
+        void removeFullLines(void);
       public:
         Game(void);
         ~Game();

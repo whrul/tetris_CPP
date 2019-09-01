@@ -19,10 +19,8 @@ namespace gamestuff {
                 if (event.type == sf::Event::KeyPressed) {
                     if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) {
                         this->fallingShape->moveSide(this->field, 1);
-                        this->fallingShape->draw(this->field);
                     } else if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) {
                         this->fallingShape->moveSide(this->field, -1);
-                        this->fallingShape->draw(this->field);
                     }
                 }
             }
@@ -44,11 +42,7 @@ namespace gamestuff {
         static sf::Clock clock;
         (this->window).clear(sf::Color::Black);
         if (clock.getElapsedTime().asMilliseconds() > 500) {
-            if (this->fallingShape->canFall(this->field)) {
-                this->fallingShape->fall(this->field);
-                this->fallingShape->draw(this->field);
-            } else {
-                this->fallingShape->draw(this->field);
+            if (!this->fallingShape->fall(field)) {
                 this->createNewShape();
             }
             clock.restart();
@@ -71,5 +65,19 @@ namespace gamestuff {
     void Game::createNewShape(void) {
         delete this->fallingShape;
         this->fallingShape = new gamestuff::OBlock;
+    }
+    void Game::removeFullLines(void) {
+        this->fallingShape->hide(this->field);
+        // bool shouldRemove = true;
+        // for (int i = 0; i < field.size(); ++i) {
+        //     shouldRemove = true;
+        //     for (unsigned int j = 0; j < field[i].size(); ++j) {
+        //         if (field[i][j] == sf::Color::Transparent) {
+        //             shouldRemove = false;
+        //             break;
+        //         }
+        //     }
+        // }
+        this->fallingShape->draw(this->field);
     }
 } // namespace gamestuff
