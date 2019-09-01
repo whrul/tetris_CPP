@@ -3,6 +3,7 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include <list>
 #include <vector>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
@@ -11,7 +12,7 @@
 
 namespace gamestuff {
     enum FieldSize {
-        WIDTH = 550,
+        WIDTH = 500,
         HEIGHT = 800,
         CELL_SIZE = 50,
         MARGIN = 70,
@@ -19,12 +20,14 @@ namespace gamestuff {
     };
     class Game {
         unsigned int scores;
-        std::vector<std::vector<sf::Color>> field;
+        std::list<std::vector<sf::Color>> field;
         sf::RenderWindow window;
         gamestuff::Shape *fallingShape; //bad alloc except
         void createField(void);
         void redrawAndShow(void);
-        void drawFiled(void);
+        void drawField(void);
+        void createNewShape(void);
+        void removeFullLines(void);
       public:
         Game(void);
         ~Game();
