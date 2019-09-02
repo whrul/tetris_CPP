@@ -22,12 +22,15 @@ namespace gamestuff {
         MARGIN = 80,
         MARGIN_RIGHT = 300,
     };
-    enum TimeSteps {
-        START_STEP = 250,
-        END_STEP = 90,
+    enum SpeedInMilliSec {
+        START_SPEED = 200,
+        MAX_SPEED = 75,
+        SPEED_INCR_STEP = 40,
     };
     class Game {
         unsigned long long scores;
+        unsigned long long totalLinesRemoved;
+        int speedInMilSec;
         std::list<std::vector<sf::Color>> field;
         std::list<std::vector<sf::Color>> nextShapeField;
         sf::RenderWindow window;
@@ -41,7 +44,7 @@ namespace gamestuff {
         void chooseNewShape(void);//indexJ
         void removeFullLines(void);
         void createShapes(void);
-        void drawScore(void);
+        void drawScoresAndLines(void);
       public:
         Game(void);
         ~Game();

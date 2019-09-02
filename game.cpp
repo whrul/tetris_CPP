@@ -1,7 +1,9 @@
 #include "game.hpp"
 
 namespace gamestuff {
-    Game::Game(void) : scores(0), 
+    Game::Game(void) : scores(0),
+                       totalLinesRemoved(0),
+                       speedInMilSec(SpeedInMilliSec::START_SPEED),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr),
                        nextShape(nullptr) {
@@ -22,6 +24,7 @@ namespace gamestuff {
             while (window.pollEvent(event)) {
                 if (event.type == sf::Event::Closed) {
                     std::cout << "Your scores: " << this->scores << std::endl;
+                    std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
@@ -62,21 +65,17 @@ namespace gamestuff {
     }
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
-        static double actualStep = TimeSteps::START_STEP;
-        static double endStep = TimeSteps::END_STEP;
+        static int maxSpeed = SpeedInMilliSec::MAX_SPEED;
         (this->window).clear(sf::Color::Black);
-        if (clock.getElapsedTime().asMilliseconds() > std::max(endStep, actualStep)) {
+        if (clock.getElapsedTime().asMilliseconds() > std::max(this->speedInMilSec, maxSpeed)) {
             if (!this->fallingShape->fall(field)) {
                 this->chooseNewShape();
             }
             clock.restart();
-            if(actualStep > 0) {
-                actualStep -= 0.25;
-            }
         }
         this->removeFullLines();
         this->drawFields();
-        this->drawScore();
+        this->drawScoresAndLines();
         (this->window).display();
     }
     void Game::drawFields(void) {
@@ -121,7 +120,7 @@ namespace gamestuff {
     void Game::removeFullLines(void) {
         this->fallingShape->hide(this->field);
         bool shouldRemove = true;
-        int totalLinesRemoved = 0;
+        int linesRemoved = 0;
         for (unsigned int i = 0; i < field.size(); ++i) {
             shouldRemove = true;
             for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
@@ -137,10 +136,15 @@ namespace gamestuff {
                 for (unsigned int i = 0; i < cellsInRow; ++i) {
                     (*(this->field).begin()).push_back(sf::Color::Transparent);
                 }
-                ++totalLinesRemoved;
+                ++linesRemoved;
+                ++(this->totalLinesRemoved);
             }
         }
-        this->scores += 100 * totalLinesRemoved * totalLinesRemoved;
+        static int speedStep = SpeedInMilliSec::SPEED_INCR_STEP;
+        this->scores += 100 * linesRemoved * linesRemoved;
+        if (linesRemoved && !(this->totalLinesRemoved % 10)) {
+            this->speedInMilSec -= (this->speedInMilSec > 0) ? speedStep : 0;
+        }
         this->fallingShape->draw(this->field);
     }
     void Game::createShapes(void) {
@@ -152,11 +156,16 @@ namespace gamestuff {
         (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
         (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
     }
-    void Game::drawScore(void) {
-        static sf::Text text("It's string", this->mainFont, 35);
-        text.setString("Scores: " + std::to_string(this->scores));
-        text.setFillColor(sf::Color::White);
-        text.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE));
-        (this->window).draw(text);
+    void Game::drawScoresAndLines(void) {
+        static sf::Text scores("It's string", this->mainFont, 35);
+        scores.setString("Scores: " + std::to_string(this->scores));
+        scores.setFillColor(sf::Color::White);
+        scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE));
+        (this->window).draw(scores);
+        static sf::Text lines("It's string", this->mainFont, 35);
+        scores.setString("Lines: " + std::to_string(this->totalLinesRemoved));
+        scores.setFillColor(sf::Color::White);
+        scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize()));
+        (this->window).draw(scores);
     }
 } // namespace gamestuff
