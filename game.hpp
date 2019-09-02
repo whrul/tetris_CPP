@@ -15,8 +15,8 @@
 
 namespace gamestuff {
     enum FieldSize {
-        WIDTH = 400,
-        HEIGHT = 800,
+        CELLS_IN_ROW = 13,
+        CELLS_IN_COL = 25,
         CELL_SIZE = 35,
         MARGIN = 80,
         MARGIN_RIGHT = 300,
@@ -26,7 +26,7 @@ namespace gamestuff {
         END_STEP = 90,
     };
     class Game {
-        unsigned int scores;
+        unsigned long long scores;
         std::list<std::vector<sf::Color>> field;
         sf::RenderWindow window;
         gamestuff::Shape *fallingShape;
@@ -34,7 +34,7 @@ namespace gamestuff {
         void createField(void);//should clear if not empty?
         void redrawAndShow(void);
         void drawField(void);
-        void chooseNewShape(void);
+        void chooseNewShape(void);//indexJ
         void removeFullLines(void);
         void createShapes(void);
       public:

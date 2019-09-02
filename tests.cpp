@@ -5,11 +5,11 @@ namespace gamestuff {
         Tests::checkFieldAndShapesSizes();
     }
     void Tests::checkFieldAndShapesSizes(void) {
-        assert(gamestuff::FieldSize::CELL_SIZE > 0 &&
-               gamestuff::ShapeSize::MAX_CELLS_IN_COL > 0 &&
-               gamestuff::ShapeSize::MAX_CELLS_IN_ROW > 0 &&
-               gamestuff::ShapeSize::MAX_CELLS_IN_COL < gamestuff::FieldSize::HEIGHT / gamestuff::FieldSize::CELL_SIZE &&
-               gamestuff::ShapeSize::MAX_CELLS_IN_ROW < gamestuff::FieldSize::WIDTH / gamestuff::FieldSize::CELL_SIZE);
+        assert(FieldSize::CELL_SIZE > 0 &&
+               ShapeSize::MAX_CELLS_IN_COL > 0 &&
+               ShapeSize::MAX_CELLS_IN_ROW > 0 &&
+               ShapeSize::MAX_CELLS_IN_COL < FieldSize::CELLS_IN_COL &&
+               ShapeSize::MAX_CELLS_IN_ROW < FieldSize::CELLS_IN_ROW);
         std::cout << "checkFieldAndShapesSizes() passed.\n";
     }
 } // namespace gamestuff
