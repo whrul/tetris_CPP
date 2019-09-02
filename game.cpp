@@ -3,11 +3,13 @@
 namespace gamestuff {
     Game::Game(void) : scores(0), 
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
-                       fallingShape(nullptr) {
+                       fallingShape(nullptr),
+                       nextShape(nullptr) {
         srand(time(NULL));
-        this->createField();
+        this->createFields();
         this->createShapes();
         this->chooseNewShape();
+        (this->mainFont).loadFromFile("font.ttf");
     }
     Game::~Game() {
         for (int i = (this->shapes).size() - 1; i >= 0; --i) {
@@ -19,6 +21,7 @@ namespace gamestuff {
             sf::Event event;
             while (window.pollEvent(event)) {
                 if (event.type == sf::Event::Closed) {
+                    std::cout << "Your scores: " << this->scores << std::endl;
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
@@ -38,13 +41,22 @@ namespace gamestuff {
             this->redrawAndShow();
         }
     }
-    void Game::createField(void) {
+    void Game::createFields(void) {
         unsigned int cellsInCol = FieldSize::CELLS_IN_COL;
         unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
         for (unsigned int i = 0; i < cellsInCol; ++i) {
             (this->field).push_back({});
             for (unsigned int j = 0; j < cellsInRow; ++j) {
                 (*std::next((this->field).begin(), i)).push_back(sf::Color::Transparent);
+            }
+        }
+
+        cellsInCol = ShapeSize::MAX_CELLS_IN_COL;
+        cellsInRow = ShapeSize::MAX_CELLS_IN_ROW;
+        for (unsigned int i = 0; i < cellsInCol; ++i) {
+            (this->nextShapeField).push_back({});
+            for (unsigned int j = 0; j < cellsInRow; ++j) {
+                (*std::next((this->nextShapeField).begin(), i)).push_back(sf::Color::Transparent);
             }
         }
     }
@@ -63,11 +75,11 @@ namespace gamestuff {
             }
         }
         this->removeFullLines();
-        this->drawField();
+        this->drawFields();
+        this->drawScore();
         (this->window).display();
-        std::cerr << this->scores << std::endl;
     }
-    void Game::drawField(void) {
+    void Game::drawFields(void) {
         static sf::RectangleShape cell(sf::Vector2f(FieldSize::CELL_SIZE, FieldSize::CELL_SIZE));
         cell.setOutlineColor(sf::Color(81, 81, 81));
         cell.setOutlineThickness(1);
@@ -78,15 +90,38 @@ namespace gamestuff {
                 window.draw(cell);
             }
         }
+        for (unsigned int i = 0; i < (this->nextShapeField).size(); ++i) {
+            for (unsigned int j = 0; j < (*std::next((this->nextShapeField).begin(), i)).size(); ++j) {
+                if (((*std::next((this->nextShapeField).begin(), i))[j]) == sf::Color::Transparent) {
+                    continue;
+                }
+                cell.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::CELL_SIZE * j, FieldSize::MARGIN + FieldSize::CELL_SIZE * i));
+                cell.setFillColor((*std::next((this->nextShapeField).begin(), i))[j]);
+                window.draw(cell);
+            }
+        }
     }
     void Game::chooseNewShape(void) {
         static int startIndexJ = FieldSize::CELLS_IN_ROW / 2 - ShapeSize::MAX_CELLS_IN_ROW / 2;
-        this->fallingShape = (this->shapes)[rand() % (this->shapes).size()];
-        this->fallingShape->setPosition(0, startIndexJ);
+        if (this->nextShape != nullptr) {
+            this->fallingShape = this->nextShape;
+        } else {
+            this->fallingShape = (this->shapes)[rand() % (this->shapes).size()];
+        } 
+        this->nextShape = (this->shapes)[rand() % (this->shapes).size()];
+        for (auto &row : this->nextShapeField) {
+            for (auto &cell : row) {
+                cell = sf::Color::Transparent;
+            }
+        }
+        this->nextShape->setPosition(0, 0);
+        this->nextShape->draw(this->nextShapeField);
+        this->fallingShape->setPosition(0, startIndexJ); 
     }
     void Game::removeFullLines(void) {
         this->fallingShape->hide(this->field);
         bool shouldRemove = true;
+        int totalLinesRemoved = 0;
         for (unsigned int i = 0; i < field.size(); ++i) {
             shouldRemove = true;
             for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
@@ -102,9 +137,10 @@ namespace gamestuff {
                 for (unsigned int i = 0; i < cellsInRow; ++i) {
                     (*(this->field).begin()).push_back(sf::Color::Transparent);
                 }
-                (this->scores) += 100;
+                ++totalLinesRemoved;
             }
         }
+        this->scores += 100 * totalLinesRemoved * totalLinesRemoved;
         this->fallingShape->draw(this->field);
     }
     void Game::createShapes(void) {
@@ -115,5 +151,12 @@ namespace gamestuff {
         (this->shapes).push_back(new gamestuff::JBlock(0, 0, sf::Color::Green));
         (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
         (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
+    }
+    void Game::drawScore(void) {
+        static sf::Text text("It's string", this->mainFont, 35);
+        text.setString("Scores: " + std::to_string(this->scores));
+        text.setFillColor(sf::Color::White);
+        text.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE));
+        (this->window).draw(text);
     }
 } // namespace gamestuff

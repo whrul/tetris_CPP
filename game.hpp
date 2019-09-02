@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <string>
 #include "shape.hpp"
 
 namespace gamestuff {
@@ -28,15 +29,19 @@ namespace gamestuff {
     class Game {
         unsigned long long scores;
         std::list<std::vector<sf::Color>> field;
+        std::list<std::vector<sf::Color>> nextShapeField;
         sf::RenderWindow window;
         gamestuff::Shape *fallingShape;
+        gamestuff::Shape *nextShape;
         std::vector<gamestuff::Shape*> shapes; //bad alloc except
-        void createField(void);//should clear if not empty?
+        sf::Font mainFont;
+        void createFields(void);//should clear if not empty?
         void redrawAndShow(void);
-        void drawField(void);
+        void drawFields(void);
         void chooseNewShape(void);//indexJ
         void removeFullLines(void);
         void createShapes(void);
+        void drawScore(void);
       public:
         Game(void);
         ~Game();
