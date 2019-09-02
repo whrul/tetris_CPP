@@ -3,7 +3,7 @@
 #ifndef SHAPE_HPP
 #define SHAPE_HPP
 
-#include<list>
+#include <list>
 #include <vector>
 #include <cstdbool>
 #include <SFML/Graphics.hpp>

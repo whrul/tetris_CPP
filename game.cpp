@@ -2,7 +2,7 @@
 
 namespace gamestuff {
     Game::Game(void) : scores(0), 
-                       window(sf::VideoMode(gamestuff::FieldSize::WIDTH + gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::MARGIN_RIGHT, gamestuff::FieldSize::HEIGHT + 2 * gamestuff::FieldSize::MARGIN), "Tetris"),
+                       window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr) {
         srand(time(NULL));
         this->createField();
@@ -29,7 +29,9 @@ namespace gamestuff {
                     } else if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) {
                         this->fallingShape->rotate(this->field);
                     } else if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) {
-                        this->fallingShape->fall(this->field);
+                        if (this->fallingShape->fall(this->field)){
+                            ++(this->scores);
+                        }
                     }
                 }
             }
@@ -37,8 +39,8 @@ namespace gamestuff {
         }
     }
     void Game::createField(void) {
-        unsigned int cellsInCol = gamestuff::FieldSize::HEIGHT / gamestuff::FieldSize::CELL_SIZE;
-        unsigned int cellsInRow = gamestuff::FieldSize::WIDTH / gamestuff::FieldSize::CELL_SIZE;
+        unsigned int cellsInCol = FieldSize::CELLS_IN_COL;
+        unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
         for (unsigned int i = 0; i < cellsInCol; ++i) {
             (this->field).push_back({});
             for (unsigned int j = 0; j < cellsInRow; ++j) {
@@ -48,32 +50,39 @@ namespace gamestuff {
     }
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
+        static double actualStep = TimeSteps::START_STEP;
+        static double endStep = TimeSteps::END_STEP;
         (this->window).clear(sf::Color::Black);
-        if (clock.getElapsedTime().asMilliseconds() > 200) {
+        if (clock.getElapsedTime().asMilliseconds() > std::max(endStep, actualStep)) {
             if (!this->fallingShape->fall(field)) {
                 this->chooseNewShape();
             }
             clock.restart();
+            if(actualStep > 0) {
+                actualStep -= 0.25;
+            }
         }
         this->removeFullLines();
         this->drawField();
         (this->window).display();
+        std::cerr << this->scores << std::endl;
     }
     void Game::drawField(void) {
-        static sf::RectangleShape cell(sf::Vector2f(gamestuff::FieldSize::CELL_SIZE, gamestuff::FieldSize::CELL_SIZE));
+        static sf::RectangleShape cell(sf::Vector2f(FieldSize::CELL_SIZE, FieldSize::CELL_SIZE));
         cell.setOutlineColor(sf::Color(81, 81, 81));
         cell.setOutlineThickness(1);
         for (unsigned int i = 0; i < (this->field).size(); ++i) {
             for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
-                cell.setPosition(sf::Vector2f(gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::CELL_SIZE * j, gamestuff::FieldSize::MARGIN + gamestuff::FieldSize::CELL_SIZE * i));
+                cell.setPosition(sf::Vector2f(FieldSize::MARGIN + FieldSize::CELL_SIZE * j, FieldSize::MARGIN + FieldSize::CELL_SIZE * i));
                 cell.setFillColor((*std::next((this->field).begin(), i))[j]);
                 window.draw(cell);
             }
         }
     }
     void Game::chooseNewShape(void) {
+        static int startIndexJ = FieldSize::CELLS_IN_ROW / 2 - ShapeSize::MAX_CELLS_IN_ROW / 2;
         this->fallingShape = (this->shapes)[rand() % (this->shapes).size()];
-        this->fallingShape->setPosition(0,0);
+        this->fallingShape->setPosition(0, startIndexJ);
     }
     void Game::removeFullLines(void) {
         this->fallingShape->hide(this->field);
@@ -89,10 +98,11 @@ namespace gamestuff {
             if (shouldRemove) {
                 (this->field).erase(std::next((this->field).begin(), i));
                 (this->field).push_front({});
-                unsigned int cellsInRow = gamestuff::FieldSize::WIDTH / gamestuff::FieldSize::CELL_SIZE;
+                unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
                 for (unsigned int i = 0; i < cellsInRow; ++i) {
                     (*(this->field).begin()).push_back(sf::Color::Transparent);
                 }
+                (this->scores) += 100;
             }
         }
         this->fallingShape->draw(this->field);
