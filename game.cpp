@@ -121,6 +121,7 @@ namespace gamestuff {
     void Game::removeFullLines(void) {
         this->fallingShape->hide(this->field);
         bool shouldRemove = true;
+        int totalLinesRemoved = 0;
         for (unsigned int i = 0; i < field.size(); ++i) {
             shouldRemove = true;
             for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
@@ -136,9 +137,10 @@ namespace gamestuff {
                 for (unsigned int i = 0; i < cellsInRow; ++i) {
                     (*(this->field).begin()).push_back(sf::Color::Transparent);
                 }
-                (this->scores) += 100;
+                ++totalLinesRemoved;
             }
         }
+        this->scores += 100 * totalLinesRemoved * totalLinesRemoved;
         this->fallingShape->draw(this->field);
     }
     void Game::createShapes(void) {
