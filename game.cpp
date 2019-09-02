@@ -9,6 +9,7 @@ namespace gamestuff {
         this->createFields();
         this->createShapes();
         this->chooseNewShape();
+        (this->mainFont).loadFromFile("font.ttf");
     }
     Game::~Game() {
         for (int i = (this->shapes).size() - 1; i >= 0; --i) {
@@ -20,6 +21,7 @@ namespace gamestuff {
             sf::Event event;
             while (window.pollEvent(event)) {
                 if (event.type == sf::Event::Closed) {
+                    std::cout << "Your scores: " << this->scores << std::endl;
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
@@ -74,8 +76,8 @@ namespace gamestuff {
         }
         this->removeFullLines();
         this->drawFields();
+        this->drawScore();
         (this->window).display();
-        std::cerr << this->scores << std::endl;
     }
     void Game::drawFields(void) {
         static sf::RectangleShape cell(sf::Vector2f(FieldSize::CELL_SIZE, FieldSize::CELL_SIZE));
@@ -147,5 +149,12 @@ namespace gamestuff {
         (this->shapes).push_back(new gamestuff::JBlock(0, 0, sf::Color::Green));
         (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
         (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
+    }
+    void Game::drawScore(void) {
+        static sf::Text text("It's string", this->mainFont, 35);
+        text.setString("Scores: " + std::to_string(this->scores));
+        text.setFillColor(sf::Color::White);
+        text.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE));
+        (this->window).draw(text);
     }
 } // namespace gamestuff

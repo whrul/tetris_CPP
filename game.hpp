@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <string>
 #include "shape.hpp"
 
 namespace gamestuff {
@@ -33,12 +34,14 @@ namespace gamestuff {
         gamestuff::Shape *fallingShape;
         gamestuff::Shape *nextShape;
         std::vector<gamestuff::Shape*> shapes; //bad alloc except
+        sf::Font mainFont;
         void createFields(void);//should clear if not empty?
         void redrawAndShow(void);
         void drawFields(void);
         void chooseNewShape(void);//indexJ
         void removeFullLines(void);
         void createShapes(void);
+        void drawScore(void);
       public:
         Game(void);
         ~Game();
