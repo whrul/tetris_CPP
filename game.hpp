@@ -12,6 +12,7 @@
 #include <ctime>
 #include <algorithm>
 #include <string>
+#include <cstdbool>
 #include "shape.hpp"
 
 namespace gamestuff {
@@ -45,6 +46,7 @@ namespace gamestuff {
         void removeFullLines(void);
         void createShapes(void);
         void drawScoresAndLines(void);
+        void drawPauseImage(void);
       public:
         Game(void);
         ~Game();

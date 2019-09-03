@@ -20,6 +20,7 @@ namespace gamestuff {
         }
     }
     void Game::startGame(void) {
+        bool pause = false;
         while ((this->window).isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -29,20 +30,26 @@ namespace gamestuff {
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
-                    if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) {
+                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && !pause) {
                         this->fallingShape->moveSide(this->field, 1);
-                    } else if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) {
+                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && !pause) {
                         this->fallingShape->moveSide(this->field, -1);
-                    } else if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) {
+                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && !pause) {
                         this->fallingShape->rotate(this->field);
-                    } else if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) {
+                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && !pause) {
                         if (this->fallingShape->fall(this->field)){
                             ++(this->scores);
                         }
+                    } else if (event.key.code == sf::Keyboard::Escape) {
+                        pause = pause ? false : true;
                     }
                 }
             }
-            this->redrawAndShow();
+            if (!pause) {
+                this->redrawAndShow();
+            } else {
+                this->drawPauseImage();
+            }
         }
     }
     void Game::createFields(void) {
@@ -168,5 +175,13 @@ namespace gamestuff {
         scores.setFillColor(sf::Color::White);
         scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize()));
         (this->window).draw(scores);
+    }
+    void Game::drawPauseImage(void) {
+        static sf::Text pause("Pause..", this->mainFont, 65);
+        pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
+        pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
+        (this->window).clear(sf::Color::Black);
+        (this->window).draw(pause);
+        (this->window).display();
     }
 } // namespace gamestuff
