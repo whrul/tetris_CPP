@@ -5,6 +5,7 @@ namespace gamestuff {
                        highScore(0),
                        totalLinesRemoved(0),
                        speedInMilSec(SpeedInMilliSec::START_SPEED),
+                       status(GameStatus::GAME_IS_ON),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr),
                        nextShape(nullptr) {
@@ -22,7 +23,6 @@ namespace gamestuff {
         }
     }
     void Game::startGame(void) {
-        bool pause = false;
         while ((this->window).isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -32,25 +32,35 @@ namespace gamestuff {
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
-                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && !pause) {
+                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && this->status == GameStatus::GAME_IS_ON) {
                         this->fallingShape->moveSide(this->field, 1);
-                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && !pause) {
+                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && this->status == GameStatus::GAME_IS_ON) {
                         this->fallingShape->moveSide(this->field, -1);
-                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && !pause) {
+                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_IS_ON) {
                         this->fallingShape->rotate(this->field);
-                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && !pause) {
+                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_IS_ON) {
                         if (this->fallingShape->fall(this->field)){
                             ++(this->scores);
                         }
                     } else if (event.key.code == sf::Keyboard::Escape) {
-                        pause = pause ? false : true;
+                        if (this->status == GameStatus::GAME_IS_ON) {
+                            this->status = GameStatus::PAUSE;
+                        } else if(this->status == GameStatus::PAUSE) {
+                            this->status = GameStatus::GAME_IS_ON;
+                        } else if(this->status == GameStatus::GAME_OVER) {
+                            std::cout << "Your scores: " << this->scores << std::endl;
+                            std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
+                            window.close();
+                        }
                     }
                 }
             }
-            if (!pause) {
-                this->redrawAndShow(pause);
-            } else {
+            if (this->status == GameStatus::GAME_IS_ON) {
+                this->redrawAndShow();
+            } else if(this->status == GameStatus::PAUSE){
                 this->drawPauseImage();
+            } else if(this->status == GameStatus::GAME_OVER) {
+                this->drawGameOverImage();
             }
         }
     }
@@ -73,14 +83,14 @@ namespace gamestuff {
             }
         }
     }
-    void Game::redrawAndShow(bool& pause) {
+    void Game::redrawAndShow(void) {
         static sf::Clock clock;
         static int maxSpeed = SpeedInMilliSec::MAX_SPEED; 
         if (clock.getElapsedTime().asMilliseconds() > std::max(this->speedInMilSec, maxSpeed)) {
             if (!this->fallingShape->fall(field)) {
                 this->removeFullLines();
                 if(!this->chooseNewShape()) {
-                    pause = true;
+                    this->status = GameStatus::GAME_OVER;
                     this->highScore = std::max(this->highScore, this->scores);
                     this->saveHighScore();
                     return;
@@ -195,18 +205,22 @@ namespace gamestuff {
         (this->window).draw(highScore);
     }
     void Game::drawPauseImage(void) {
-        // static sf::Text pause("Pause..", this->mainFont, 65);
-        // pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
-        // pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
-        // (this->window).clear(sf::Color::Black);
-        // (this->window).draw(pause);
-        (this->window).clear();
+        static sf::Text pause("Pause..", this->mainFont, 65);
+        pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
+        pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
+        (this->window).clear(sf::Color::Black);
+        (this->window).draw(pause);
+        (this->window).display();
+    }
+    void Game::drawGameOverImage(void) {
+        (this->window).clear(sf::Color::Black);
         this->drawFields();
+        this->drawScoresAndLines();
         (this->window).display();
     }
     void Game::uploadHighScore(void) {
         std::ifstream dataFile("data/data.txt");
-        std::string scores = "@";
+        std::string scores = "";
         if (!dataFile.is_open()) {
             std::cout << "Can not open data file.\n";
             return;

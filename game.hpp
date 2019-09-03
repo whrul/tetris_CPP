@@ -29,11 +29,17 @@ namespace gamestuff {
         MAX_SPEED = 75,
         SPEED_INCR_STEP = 30,
     };
+    enum GameStatus {
+        GAME_IS_ON = 0,
+        PAUSE,
+        GAME_OVER,
+    };
     class Game {
         unsigned long long scores;
         unsigned long long highScore;
         unsigned long long totalLinesRemoved;
         int speedInMilSec;
+        GameStatus status;
         std::list<std::vector<sf::Color>> field;
         std::list<std::vector<sf::Color>> nextShapeField;
         sf::RenderWindow window;
@@ -42,13 +48,14 @@ namespace gamestuff {
         std::vector<gamestuff::Shape*> shapes; //bad alloc except
         sf::Font mainFont;
         void createFields(void);//should clear if not empty?
-        void redrawAndShow(bool& pause);
+        void redrawAndShow(void);
         void drawFields(void);
         bool chooseNewShape(void);
         void removeFullLines(void);
         void createShapes(void);
         void drawScoresAndLines(void);
         void drawPauseImage(void);
+        void drawGameOverImage(void);
         void uploadHighScore(void);
         void saveHighScore(void);
       public:
