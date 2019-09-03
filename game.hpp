@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <string>
 #include <cstdbool>
+#include <fstream>
 #include "shape.hpp"
 
 namespace gamestuff {
@@ -21,17 +22,24 @@ namespace gamestuff {
         CELLS_IN_COL = 20,
         CELL_SIZE = 34,
         MARGIN = 70,
-        MARGIN_RIGHT = 300,
+        MARGIN_RIGHT = 360,
     };
     enum SpeedInMilliSec {
         START_SPEED = 200,
         MAX_SPEED = 75,
         SPEED_INCR_STEP = 30,
     };
+    enum GameStatus {
+        GAME_IS_ON = 0,
+        PAUSE,
+        GAME_OVER,
+    };
     class Game {
         unsigned long long scores;
+        unsigned long long highScore;
         unsigned long long totalLinesRemoved;
         int speedInMilSec;
+        GameStatus status;
         std::list<std::vector<sf::Color>> field;
         std::list<std::vector<sf::Color>> nextShapeField;
         sf::RenderWindow window;
@@ -42,16 +50,20 @@ namespace gamestuff {
         void createFields(void);//should clear if not empty?
         void redrawAndShow(void);
         void drawFields(void);
-        void chooseNewShape(void);
+        bool chooseNewShape(void);
         void removeFullLines(void);
         void createShapes(void);
         void drawScoresAndLines(void);
         void drawPauseImage(void);
+        void drawGameOverImage(void);
+        void uploadHighScore(void);
+        void saveHighScore(void);
       public:
         Game(void);
         ~Game();
         void startGame(void);
     };
+    bool isUnsignedNumber(std::string numberStr);
 } // namespace gamestuff
 
 #endif

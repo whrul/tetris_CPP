@@ -125,6 +125,23 @@ namespace gamestuff {
         this->draw(field);
         return true;
     }
+    bool Shape::canDraw(std::list<std::vector<sf::Color>> &field) const {
+        for (unsigned int i = 0; i < (this->shapeMap).size(); ++i) {
+            for (unsigned int j = 0; j < (this->shapeMap)[i].size(); ++j){
+                if (!(this->shapeMap)[i][j]) {
+                    continue;
+                }
+                if (this->leftTopCornI + i < 0 ||
+                    this->leftTopCornI + i >= field.size() ||
+                    this->leftTopCornJ + j < 0 ||
+                    this->leftTopCornJ + j >= (*std::next(field.begin(), this->leftTopCornI + i)).size() ||
+                    (*std::next(field.begin(), this->leftTopCornI + i))[this->leftTopCornJ + j] != sf::Color::Transparent) {
+                    return false;          
+                }
+            }
+        }
+        return true;
+    }
     OBlock::OBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 1 && ShapeSize::MAX_CELLS_IN_ROW > 1) {
             (this->shapeMap).push_back({1, 1});

@@ -2,8 +2,10 @@
 
 namespace gamestuff {
     Game::Game(void) : scores(0),
+                       highScore(0),
                        totalLinesRemoved(0),
                        speedInMilSec(SpeedInMilliSec::START_SPEED),
+                       status(GameStatus::GAME_IS_ON),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr),
                        nextShape(nullptr) {
@@ -13,6 +15,7 @@ namespace gamestuff {
         this->chooseNewShape();
         (this->mainFont).loadFromFile("font.ttf");
         (this->window).setVerticalSyncEnabled(true);
+        this->uploadHighScore();
     }
     Game::~Game() {
         for (int i = (this->shapes).size() - 1; i >= 0; --i) {
@@ -20,7 +23,6 @@ namespace gamestuff {
         }
     }
     void Game::startGame(void) {
-        bool pause = false;
         while ((this->window).isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -30,25 +32,35 @@ namespace gamestuff {
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
-                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && !pause) {
+                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && this->status == GameStatus::GAME_IS_ON) {
                         this->fallingShape->moveSide(this->field, 1);
-                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && !pause) {
+                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && this->status == GameStatus::GAME_IS_ON) {
                         this->fallingShape->moveSide(this->field, -1);
-                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && !pause) {
+                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_IS_ON) {
                         this->fallingShape->rotate(this->field);
-                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && !pause) {
+                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_IS_ON) {
                         if (this->fallingShape->fall(this->field)){
                             ++(this->scores);
                         }
                     } else if (event.key.code == sf::Keyboard::Escape) {
-                        pause = pause ? false : true;
+                        if (this->status == GameStatus::GAME_IS_ON) {
+                            this->status = GameStatus::PAUSE;
+                        } else if(this->status == GameStatus::PAUSE) {
+                            this->status = GameStatus::GAME_IS_ON;
+                        } else if(this->status == GameStatus::GAME_OVER) {
+                            std::cout << "Your scores: " << this->scores << std::endl;
+                            std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
+                            window.close();
+                        }
                     }
                 }
             }
-            if (!pause) {
+            if (this->status == GameStatus::GAME_IS_ON) {
                 this->redrawAndShow();
-            } else {
+            } else if(this->status == GameStatus::PAUSE){
                 this->drawPauseImage();
+            } else if(this->status == GameStatus::GAME_OVER) {
+                this->drawGameOverImage();
             }
         }
     }
@@ -73,15 +85,20 @@ namespace gamestuff {
     }
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
-        static int maxSpeed = SpeedInMilliSec::MAX_SPEED;
-        (this->window).clear(sf::Color::Black);
+        static int maxSpeed = SpeedInMilliSec::MAX_SPEED; 
         if (clock.getElapsedTime().asMilliseconds() > std::max(this->speedInMilSec, maxSpeed)) {
             if (!this->fallingShape->fall(field)) {
-                this->chooseNewShape();
+                this->removeFullLines();
+                if(!this->chooseNewShape()) {
+                    this->status = GameStatus::GAME_OVER;
+                    this->highScore = std::max(this->highScore, this->scores);
+                    this->saveHighScore();
+                    return;
+                }
             }
             clock.restart();
         }
-        this->removeFullLines();
+        (this->window).clear(sf::Color::Black);        
         this->drawFields();
         this->drawScoresAndLines();
         (this->window).display();
@@ -108,25 +125,30 @@ namespace gamestuff {
             }
         }
     }
-    void Game::chooseNewShape(void) {
+    bool Game::chooseNewShape(void) {
         static int startIndexJ = FieldSize::CELLS_IN_ROW / 2 - ShapeSize::MAX_CELLS_IN_ROW / 2;
         if (this->nextShape != nullptr) {
             this->fallingShape = this->nextShape;
         } else {
             this->fallingShape = (this->shapes)[rand() % (this->shapes).size()];
         } 
-        this->nextShape = (this->shapes)[rand() % (this->shapes).size()];
+        this->fallingShape->setPosition(0, startIndexJ); 
+        if(!this->fallingShape->canDraw(this->field)) {
+            return false;
+        }
+        this->fallingShape->draw(this->field);
         for (auto &row : this->nextShapeField) {
             for (auto &cell : row) {
                 cell = sf::Color::Transparent;
             }
         }
+        this->nextShape = (this->shapes)[rand() % (this->shapes).size()];
         this->nextShape->setPosition(0, 0);
         this->nextShape->draw(this->nextShapeField);
         this->fallingShape->setPosition(0, startIndexJ); 
+        return true;
     }
     void Game::removeFullLines(void) {
-        this->fallingShape->hide(this->field);
         bool shouldRemove = true;
         int linesRemoved = 0;
         for (unsigned int i = 0; i < field.size(); ++i) {
@@ -153,7 +175,6 @@ namespace gamestuff {
         if (linesRemoved && !(this->totalLinesRemoved % 10)) {
             this->speedInMilSec -= (this->speedInMilSec > 0) ? speedStep : 0;
         }
-        this->fallingShape->draw(this->field);
     }
     void Game::createShapes(void) {
         (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Cyan));
@@ -165,16 +186,23 @@ namespace gamestuff {
         (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
     }
     void Game::drawScoresAndLines(void) {
-        static sf::Text scores("It's string", this->mainFont, 35);
+        static sf::Text scores("It's string", this->mainFont, 30);
         scores.setString("Scores: " + std::to_string(this->scores));
         scores.setFillColor(sf::Color::White);
         scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE));
         (this->window).draw(scores);
-        static sf::Text lines("It's string", this->mainFont, 35);
+        
+        static sf::Text lines("It's string", this->mainFont, 30);
         scores.setString("Lines: " + std::to_string(this->totalLinesRemoved));
         scores.setFillColor(sf::Color::White);
         scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize()));
         (this->window).draw(scores);
+        
+        static sf::Text highScore("It's string", this->mainFont, 30);
+        highScore.setString("High score: " + std::to_string(std::max(this->highScore, this->scores)));
+        highScore.setFillColor(sf::Color::White);
+        highScore.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize() + 3 * lines.getCharacterSize()));
+        (this->window).draw(highScore);
     }
     void Game::drawPauseImage(void) {
         static sf::Text pause("Pause..", this->mainFont, 65);
@@ -183,5 +211,60 @@ namespace gamestuff {
         (this->window).clear(sf::Color::Black);
         (this->window).draw(pause);
         (this->window).display();
+    }
+    void Game::drawGameOverImage(void) {
+        (this->window).clear(sf::Color::Black);
+        this->drawFields();
+        this->drawScoresAndLines();
+        (this->window).display();
+    }
+    void Game::uploadHighScore(void) {
+        std::ifstream dataFile("data/data.txt");
+        std::string scores = "";
+        if (!dataFile.is_open()) {
+            std::cout << "Can not open data file.\n";
+            return;
+        }
+        // dataFile.seekg(0);
+        std::getline(dataFile, scores);
+        if (dataFile.bad() || dataFile.fail()) {
+            std::cout << "Can not read from data file.\n";
+            dataFile.close();
+            return;
+        } 
+        if(isUnsignedNumber(scores)) {
+            try {
+                this->highScore = std::stoull(scores);
+            }
+            catch (std::out_of_range &ex) {
+                std::cout << "Out of range.\n";
+            }
+        } else {
+            std::cout << "Wrong data format.\n";
+        }
+        dataFile.close();
+    }
+    void Game::saveHighScore(void) {
+        std::ofstream dataFile("data/data.txt");
+        if (!dataFile.is_open()) {
+            std::cout << "Can not open data file.\n";
+            return;
+        }
+        dataFile << std::to_string(this->highScore);
+        if (!dataFile.good()) {
+            std::cout << "Can not save to data file.\n";
+        }
+        dataFile.close();
+    }
+    bool isUnsignedNumber(std::string numberStr) {
+        if (!numberStr.size()) {
+            return false;
+        }
+        for (const char& c : numberStr) {
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 } // namespace gamestuff
