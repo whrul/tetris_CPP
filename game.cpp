@@ -206,6 +206,7 @@ namespace gamestuff {
     }
     void Game::drawPauseImage(void) {
         static sf::Text pause("Pause..", this->mainFont, 65);
+        pause.setFillColor(sf::Color::White);
         pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
         pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
         (this->window).clear(sf::Color::Black);
@@ -213,9 +214,14 @@ namespace gamestuff {
         (this->window).display();
     }
     void Game::drawGameOverImage(void) {
+        static sf::Text gameover("Game over", this->mainFont, 70);
+        gameover.setFillColor(sf::Color::Red);
+        gameover.setOrigin(gameover.getLocalBounds().width / 2, gameover.getLocalBounds().height / 2);
+        gameover.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
         (this->window).clear(sf::Color::Black);
         this->drawFields();
         this->drawScoresAndLines();
+        (this->window).draw(gameover);
         (this->window).display();
     }
     void Game::uploadHighScore(void) {
