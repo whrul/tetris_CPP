@@ -16,16 +16,16 @@
 
 namespace gamestuff {
     enum FieldSize {
-        CELLS_IN_ROW = 13,
-        CELLS_IN_COL = 25,
-        CELL_SIZE = 35,
-        MARGIN = 80,
+        CELLS_IN_ROW = 10,
+        CELLS_IN_COL = 20,
+        CELL_SIZE = 34,
+        MARGIN = 70,
         MARGIN_RIGHT = 300,
     };
     enum SpeedInMilliSec {
         START_SPEED = 200,
         MAX_SPEED = 75,
-        SPEED_INCR_STEP = 40,
+        SPEED_INCR_STEP = 30,
     };
     class Game {
         unsigned long long scores;
@@ -41,7 +41,7 @@ namespace gamestuff {
         void createFields(void);//should clear if not empty?
         void redrawAndShow(void);
         void drawFields(void);
-        void chooseNewShape(void);//indexJ
+        void chooseNewShape(void);
         void removeFullLines(void);
         void createShapes(void);
         void drawScoresAndLines(void);

@@ -12,6 +12,7 @@ namespace gamestuff {
         this->createShapes();
         this->chooseNewShape();
         (this->mainFont).loadFromFile("font.ttf");
+        (this->window).setVerticalSyncEnabled(true);
     }
     Game::~Game() {
         for (int i = (this->shapes).size() - 1; i >= 0; --i) {
