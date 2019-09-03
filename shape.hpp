@@ -33,6 +33,7 @@ namespace gamestuff {
         virtual bool rotate(std::list<std::vector<sf::Color>> &field);
         void setPosition(int leftTopCornerI, int leftTopCornerJ);
         virtual void justForMakingShapeClassAbstract(void) = 0;
+        bool canDraw(std::list<std::vector<sf::Color>> &field) const;
     };
     class OBlock : public Shape {
         void justForMakingShapeClassAbstract(void) override{};

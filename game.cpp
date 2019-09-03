@@ -47,7 +47,7 @@ namespace gamestuff {
                 }
             }
             if (!pause) {
-                this->redrawAndShow();
+                this->redrawAndShow(pause);
             } else {
                 this->drawPauseImage();
             }
@@ -72,17 +72,20 @@ namespace gamestuff {
             }
         }
     }
-    void Game::redrawAndShow(void) {
+    void Game::redrawAndShow(bool& pause) {
         static sf::Clock clock;
-        static int maxSpeed = SpeedInMilliSec::MAX_SPEED;
-        (this->window).clear(sf::Color::Black);
+        static int maxSpeed = SpeedInMilliSec::MAX_SPEED; 
         if (clock.getElapsedTime().asMilliseconds() > std::max(this->speedInMilSec, maxSpeed)) {
             if (!this->fallingShape->fall(field)) {
-                this->chooseNewShape();
+                this->removeFullLines();
+                if(!this->chooseNewShape()) {
+                    pause = true;
+                    return;
+                }
             }
             clock.restart();
         }
-        this->removeFullLines();
+        (this->window).clear(sf::Color::Black);        
         this->drawFields();
         this->drawScoresAndLines();
         (this->window).display();
@@ -109,25 +112,30 @@ namespace gamestuff {
             }
         }
     }
-    void Game::chooseNewShape(void) {
+    bool Game::chooseNewShape(void) {
         static int startIndexJ = FieldSize::CELLS_IN_ROW / 2 - ShapeSize::MAX_CELLS_IN_ROW / 2;
         if (this->nextShape != nullptr) {
             this->fallingShape = this->nextShape;
         } else {
             this->fallingShape = (this->shapes)[rand() % (this->shapes).size()];
         } 
-        this->nextShape = (this->shapes)[rand() % (this->shapes).size()];
+        this->fallingShape->setPosition(0, startIndexJ); 
+        if(!this->fallingShape->canDraw(this->field)) {
+            return false;
+        }
+        this->fallingShape->draw(this->field);
         for (auto &row : this->nextShapeField) {
             for (auto &cell : row) {
                 cell = sf::Color::Transparent;
             }
         }
+        this->nextShape = (this->shapes)[rand() % (this->shapes).size()];
         this->nextShape->setPosition(0, 0);
         this->nextShape->draw(this->nextShapeField);
         this->fallingShape->setPosition(0, startIndexJ); 
+        return true;
     }
     void Game::removeFullLines(void) {
-        this->fallingShape->hide(this->field);
         bool shouldRemove = true;
         int linesRemoved = 0;
         for (unsigned int i = 0; i < field.size(); ++i) {
@@ -154,7 +162,6 @@ namespace gamestuff {
         if (linesRemoved && !(this->totalLinesRemoved % 10)) {
             this->speedInMilSec -= (this->speedInMilSec > 0) ? speedStep : 0;
         }
-        this->fallingShape->draw(this->field);
     }
     void Game::createShapes(void) {
         (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Cyan));
@@ -185,11 +192,13 @@ namespace gamestuff {
         (this->window).draw(highScore);
     }
     void Game::drawPauseImage(void) {
-        static sf::Text pause("Pause..", this->mainFont, 65);
-        pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
-        pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
-        (this->window).clear(sf::Color::Black);
-        (this->window).draw(pause);
+        // static sf::Text pause("Pause..", this->mainFont, 65);
+        // pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
+        // pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
+        // (this->window).clear(sf::Color::Black);
+        // (this->window).draw(pause);
+        (this->window).clear();
+        this->drawFields();
         (this->window).display();
     }
     void Game::uploadHighScore(void) {

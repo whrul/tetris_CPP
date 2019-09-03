@@ -42,9 +42,9 @@ namespace gamestuff {
         std::vector<gamestuff::Shape*> shapes; //bad alloc except
         sf::Font mainFont;
         void createFields(void);//should clear if not empty?
-        void redrawAndShow(void);
+        void redrawAndShow(bool& pause);
         void drawFields(void);
-        void chooseNewShape(void);
+        bool chooseNewShape(void);
         void removeFullLines(void);
         void createShapes(void);
         void drawScoresAndLines(void);
