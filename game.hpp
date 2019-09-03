@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <string>
 #include <cstdbool>
+#include <fstream>
 #include "shape.hpp"
 
 namespace gamestuff {
@@ -21,7 +22,7 @@ namespace gamestuff {
         CELLS_IN_COL = 20,
         CELL_SIZE = 34,
         MARGIN = 70,
-        MARGIN_RIGHT = 300,
+        MARGIN_RIGHT = 360,
     };
     enum SpeedInMilliSec {
         START_SPEED = 200,
@@ -30,6 +31,7 @@ namespace gamestuff {
     };
     class Game {
         unsigned long long scores;
+        unsigned long long highScore;
         unsigned long long totalLinesRemoved;
         int speedInMilSec;
         std::list<std::vector<sf::Color>> field;
@@ -47,11 +49,14 @@ namespace gamestuff {
         void createShapes(void);
         void drawScoresAndLines(void);
         void drawPauseImage(void);
+        void uploadHighScore(void);
+        void saveScore(void);
       public:
         Game(void);
         ~Game();
         void startGame(void);
     };
+    bool isUnsignedNumber(std::string numberStr);
 } // namespace gamestuff
 
 #endif

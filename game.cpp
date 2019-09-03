@@ -13,6 +13,7 @@ namespace gamestuff {
         this->chooseNewShape();
         (this->mainFont).loadFromFile("font.ttf");
         (this->window).setVerticalSyncEnabled(true);
+        this->uploadHighScore();
     }
     Game::~Game() {
         for (int i = (this->shapes).size() - 1; i >= 0; --i) {
@@ -165,16 +166,23 @@ namespace gamestuff {
         (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
     }
     void Game::drawScoresAndLines(void) {
-        static sf::Text scores("It's string", this->mainFont, 35);
+        static sf::Text scores("It's string", this->mainFont, 30);
         scores.setString("Scores: " + std::to_string(this->scores));
         scores.setFillColor(sf::Color::White);
         scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE));
         (this->window).draw(scores);
-        static sf::Text lines("It's string", this->mainFont, 35);
+        
+        static sf::Text lines("It's string", this->mainFont, 30);
         scores.setString("Lines: " + std::to_string(this->totalLinesRemoved));
         scores.setFillColor(sf::Color::White);
         scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize()));
         (this->window).draw(scores);
+        
+        static sf::Text highScore("It's string", this->mainFont, 30);
+        highScore.setString("High score: " + std::to_string(std::max(this->highScore, this->scores)));
+        highScore.setFillColor(sf::Color::White);
+        highScore.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize() + 3 * lines.getCharacterSize()));
+        (this->window).draw(highScore);
     }
     void Game::drawPauseImage(void) {
         static sf::Text pause("Pause..", this->mainFont, 65);
@@ -183,5 +191,48 @@ namespace gamestuff {
         (this->window).clear(sf::Color::Black);
         (this->window).draw(pause);
         (this->window).display();
+    }
+    void Game::uploadHighScore(void) {
+        std::ifstream dataFile("data/data.txt");
+        std::string scores = "";
+        if (!dataFile.is_open()) {
+            std::cout << "The data file is demaged.\n";
+            this->highScore = 0;
+            return;
+        }
+        std::getline(dataFile, scores);
+        if (!dataFile.good()) {
+            std::cout << "The data file is demaged.\n";
+            this->highScore = 0;
+            dataFile.close();
+            return;
+        } 
+        if(isUnsignedNumber(scores)) {
+            try {
+                this->highScore = std::stoull(scores);
+            }
+            catch (std::out_of_range &ex) {
+                this->highScore = 0;
+                std::cout << "Out of range.\n";
+            }
+        } else {
+            this->highScore = 0;
+            std::cout << "Wrong data format.\n";
+        }
+        dataFile.close();
+    }
+    void Game::saveScore(void) {
+
+    }
+    bool isUnsignedNumber(std::string numberStr) {
+        if (!numberStr.size()) {
+            return false;
+        }
+        for (const char& c : numberStr) {
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 } // namespace gamestuff
