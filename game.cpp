@@ -2,6 +2,7 @@
 
 namespace gamestuff {
     Game::Game(void) : scores(0),
+                       highScore(0),
                        totalLinesRemoved(0),
                        speedInMilSec(SpeedInMilliSec::START_SPEED),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
@@ -80,6 +81,8 @@ namespace gamestuff {
                 this->removeFullLines();
                 if(!this->chooseNewShape()) {
                     pause = true;
+                    this->highScore = std::max(this->highScore, this->scores);
+                    this->saveHighScore();
                     return;
                 }
             }
@@ -203,16 +206,15 @@ namespace gamestuff {
     }
     void Game::uploadHighScore(void) {
         std::ifstream dataFile("data/data.txt");
-        std::string scores = "";
+        std::string scores = "@";
         if (!dataFile.is_open()) {
-            std::cout << "The data file is demaged.\n";
-            this->highScore = 0;
+            std::cout << "Can not open data file.\n";
             return;
         }
+        // dataFile.seekg(0);
         std::getline(dataFile, scores);
-        if (!dataFile.good()) {
-            std::cout << "The data file is demaged.\n";
-            this->highScore = 0;
+        if (dataFile.bad() || dataFile.fail()) {
+            std::cout << "Can not read from data file.\n";
             dataFile.close();
             return;
         } 
@@ -221,17 +223,24 @@ namespace gamestuff {
                 this->highScore = std::stoull(scores);
             }
             catch (std::out_of_range &ex) {
-                this->highScore = 0;
                 std::cout << "Out of range.\n";
             }
         } else {
-            this->highScore = 0;
             std::cout << "Wrong data format.\n";
         }
         dataFile.close();
     }
-    void Game::saveScore(void) {
-
+    void Game::saveHighScore(void) {
+        std::ofstream dataFile("data/data.txt");
+        if (!dataFile.is_open()) {
+            std::cout << "Can not open data file.\n";
+            return;
+        }
+        dataFile << std::to_string(this->highScore);
+        if (!dataFile.good()) {
+            std::cout << "Can not save to data file.\n";
+        }
+        dataFile.close();
     }
     bool isUnsignedNumber(std::string numberStr) {
         if (!numberStr.size()) {

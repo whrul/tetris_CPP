@@ -50,7 +50,7 @@ namespace gamestuff {
         void drawScoresAndLines(void);
         void drawPauseImage(void);
         void uploadHighScore(void);
-        void saveScore(void);
+        void saveHighScore(void);
       public:
         Game(void);
         ~Game();
