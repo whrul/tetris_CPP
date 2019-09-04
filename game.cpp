@@ -283,19 +283,20 @@ namespace gamestuff {
                                            sf::Text("Restart", this->mainFont, 50),
                                            sf::Text("Exit", this->mainFont, 50)};
         for (unsigned int i = 0; i < texts.size(); ++i) {
-            texts[i].setFillColor(sf::Color::Red);
+            texts[i].setFillColor(sf::Color(255, 15, 15));
             texts[i].setOrigin(texts[i].getLocalBounds().width / 2, texts[i].getLocalBounds().height / 2);
             texts[i].setPosition(sf::Vector2f((this->window).getSize().x / 2, (this->window).getSize().y / 2 + (i - texts.size() / 2) * 70));
             texts[i].setOutlineColor(sf::Color::White);
             texts[i].setOutlineThickness(0);
         }
+        texts[0].setOutlineThickness(2);
         unsigned int actualMenuPosition = 0;
         if (this->menuPosition == GameStatus::RESTART) {
             actualMenuPosition = 1;
         } else {
             actualMenuPosition = 2;
         }
-        texts[actualMenuPosition].setOutlineThickness(2);
+        texts[actualMenuPosition].setOutlineThickness(1);
         (this->window).clear(sf::Color::Black);
         this->drawFields();
         this->drawScoresAndLines();
