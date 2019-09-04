@@ -37,6 +37,7 @@ namespace gamestuff {
         EXIT,
     };
     class Game {
+        bool canNotLaunchTheGame;
         unsigned long long scores;
         unsigned long long highScore;
         unsigned long long totalLinesRemoved;
@@ -49,16 +50,16 @@ namespace gamestuff {
         sf::RenderWindow window;
         gamestuff::Shape *fallingShape;
         gamestuff::Shape *nextShape;
-        std::vector<gamestuff::Shape*> shapes; //bad alloc except
+        std::vector<gamestuff::Shape*> shapes;
         sf::Font mainFont;
         std::vector<int> linesForDestroy;
-        void createFields(void);//should clear if not empty?
+        void createFields(void);
         void redrawAndShow(void);
         void drawFields(void);
         bool chooseNewShape(void);
         int removeFullLines(void);
         int dropAllDown(void);
-        void createShapes(void); //if size == 0;
+        void createShapes(void);
         void drawScoresAndLines(void);
         void drawPauseImage(void);
         void drawGameOverImage(void);

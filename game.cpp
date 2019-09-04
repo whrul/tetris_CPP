@@ -1,7 +1,8 @@
 #include "game.hpp"
 
 namespace gamestuff {
-    Game::Game(void) : scores(0),
+    Game::Game(void) : canNotLaunchTheGame(false),
+                       scores(0),
                        highScore(0),
                        totalLinesRemoved(0),
                        speedInMilSec(SpeedInMilliSec::START_SPEED),
@@ -14,10 +15,12 @@ namespace gamestuff {
         srand(time(NULL));
         this->createFields();
         this->createShapes();
-        this->chooseNewShape();
-        (this->mainFont).loadFromFile("font.ttf");
-        (this->window).setVerticalSyncEnabled(true);
-        this->uploadHighScore();
+        if (!this->canNotLaunchTheGame) {
+            this->chooseNewShape();
+            (this->mainFont).loadFromFile("font.ttf");
+            (this->window).setVerticalSyncEnabled(true);
+            this->uploadHighScore();
+        }
     }
     Game::~Game() {
         for (int i = (this->shapes).size() - 1; i >= 0; --i) {
@@ -25,6 +28,9 @@ namespace gamestuff {
         }
     }
     void Game::startGame(void) {
+        if (this->canNotLaunchTheGame) {
+            return;
+        }
         while ((this->window).isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -227,13 +233,22 @@ namespace gamestuff {
         return linesDroped;
     }
     void Game::createShapes(void) {
-        (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Cyan));
-        (this->shapes).push_back(new gamestuff::TBlock(0, 0, sf::Color::Red));
-        (this->shapes).push_back(new gamestuff::ZBlock(0, 0, sf::Color::Yellow));
-        (this->shapes).push_back(new gamestuff::SBlock(0, 0, sf::Color::Blue));
-        (this->shapes).push_back(new gamestuff::JBlock(0, 0, sf::Color::Green));
-        (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
-        (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
+        try{
+            (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Cyan));
+            (this->shapes).push_back(new gamestuff::TBlock(0, 0, sf::Color::Red));
+            (this->shapes).push_back(new gamestuff::ZBlock(0, 0, sf::Color::Yellow));
+            (this->shapes).push_back(new gamestuff::SBlock(0, 0, sf::Color::Blue));
+            (this->shapes).push_back(new gamestuff::JBlock(0, 0, sf::Color::Green));
+            (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
+            (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
+        } catch(std::bad_alloc& ex) {
+            for (int i = (this->shapes).size() - 1; i >= 0; --i) {
+                delete (this->shapes)[i];
+            }
+            std::cerr << "Do not enough memory.\nThe game can not be launched.\n";
+            this->canNotLaunchTheGame = true;
+        }
+        
     }
     void Game::drawScoresAndLines(void) {
         static sf::Text scores("It's string", this->mainFont, 30);
