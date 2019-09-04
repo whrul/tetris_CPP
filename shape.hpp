@@ -19,6 +19,7 @@ namespace gamestuff {
         int leftTopCornI;
         int leftTopCornJ;
         std::vector<std::vector<int>> shapeMap;
+        std::vector<std::vector<int>> originalShapeMap;
         bool canMoveSide(const std::list<std::vector<sf::Color>> &field, const int direction) const;
         bool canFall(const std::list<std::vector<sf::Color>> &field) const;
         bool canRotate(std::list<std::vector<sf::Color>> &field, std::vector<std::vector<int>> &newShapeMap);
@@ -34,6 +35,7 @@ namespace gamestuff {
         void setPosition(int leftTopCornerI, int leftTopCornerJ);
         virtual void justForMakingShapeClassAbstract(void) = 0;
         bool canDraw(std::list<std::vector<sf::Color>> &field) const;
+        void setOriginalMap(void);
     };
     class OBlock : public Shape {
         void justForMakingShapeClassAbstract(void) override{};
