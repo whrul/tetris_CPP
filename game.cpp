@@ -173,12 +173,6 @@ namespace gamestuff {
                 }
             }
             if (shouldRemove) {
-                // (this->field).erase(std::next((this->field).begin(), i));
-                // (this->field).push_front({});
-                // unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
-                // for (unsigned int i = 0; i < cellsInRow; ++i) {
-                //     (*(this->field).begin()).push_back(sf::Color::Transparent);
-                // }
                 for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
                     (*std::next((this->field).begin(), i))[j] = sf::Color::Transparent;
                 }
@@ -187,56 +181,28 @@ namespace gamestuff {
                 this->linesForDestroy.push_back(i);
             }
         }
-        // static int speedStep = SpeedInMilliSec::SPEED_INCR_STEP;
-        // this->scores += 100 * linesRemoved * linesRemoved;
-        // if (linesRemoved && !(this->totalLinesRemoved % 10)) {
-        //     this->speedInMilSec -= (this->speedInMilSec > 0) ? speedStep : 0;
-        // }
         return linesRemoved;
     }
     int Game::dropAllDown(void) {
-        // bool shouldDrop = true;
-        // int linesDroped = 0;
-        // bool isUnderBlocks = false;
-        // for (unsigned int i = 0; i < field.size(); ++i) {
-        //     shouldDrop = true;
-        //     for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
-        //         if ((*std::next((this->field).begin(), i))[j] != sf::Color::Transparent) {
-        //             shouldDrop = false;
-        //             isUnderBlocks = true;
-        //             break;
-        //         }
-        //     }
-        //     if (shouldDrop && isUnderBlocks) {
-        //         (this->field).erase(std::next((this->field).begin(), i));
-        //         (this->field).push_front({});
-        //         unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
-        //         for (unsigned int i = 0; i < cellsInRow; ++i) {
-        //             (*(this->field).begin()).push_back(sf::Color::Transparent);
-        //         }
-        //         ++linesDroped;
-        //     }
-        // }
         if (this->linesForDestroy.empty()) {
             return 0;
         }
         for (int i = this->linesForDestroy.size() - 1; i >= 0; --i) {
             (this->field).erase(std::next((this->field).begin(), this->linesForDestroy[i]));
         }
-        int linesDroped = 0;
         for (unsigned int i = 0; i < this->linesForDestroy.size(); ++i) {
             (this->field).push_front({});
             unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
             for (unsigned int j = 0; j < cellsInRow; ++j) {
                 (*(this->field).begin()).push_back(sf::Color::Transparent);
             }
-            ++linesDroped;
         }
         static int speedStep = SpeedInMilliSec::SPEED_INCR_STEP;
-        this->scores += 100 * linesDroped * linesDroped;
-        if (linesDroped && !(this->totalLinesRemoved % 10)) {
+        this->scores += 100 * this->linesForDestroy.size() * this->linesForDestroy.size();
+        if (!(this->totalLinesRemoved % 10)) {
             this->speedInMilSec -= (this->speedInMilSec > 0) ? speedStep : 0;
         }
+        int linesDroped = this->linesForDestroy.size();
         this->linesForDestroy.erase(this->linesForDestroy.begin(), this->linesForDestroy.end());
         return linesDroped;
     }
