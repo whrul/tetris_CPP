@@ -6,6 +6,7 @@ namespace gamestuff {
                        totalLinesRemoved(0),
                        speedInMilSec(SpeedInMilliSec::START_SPEED),
                        status(GameStatus::GAME_IS_ON),
+                       menuPosition(GameStatus::RESTART),
                        blockMovement(false),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr),
@@ -52,6 +53,22 @@ namespace gamestuff {
                             std::cout << "Your scores: " << this->scores << std::endl;
                             std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
                             window.close();
+                        }
+                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_OVER) {
+                        if (this->menuPosition == GameStatus::EXIT) {
+                            this->menuPosition = GameStatus::RESTART;
+                        }
+                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_OVER) {
+                        if (this->menuPosition == GameStatus::RESTART) {
+                            this->menuPosition = GameStatus::EXIT;
+                        }
+                    } else if (event.key.code == sf::Keyboard::Return && this->status == GameStatus::GAME_OVER) {
+                        if (this->menuPosition == GameStatus::EXIT) {
+                            std::cout << "Your scores: " << this->scores << std::endl;
+                            std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
+                            window.close();
+                        } else {
+                            this->restartGame();
                         }
                     }
                 }
@@ -244,14 +261,29 @@ namespace gamestuff {
         (this->window).display();
     }
     void Game::drawGameOverImage(void) {
-        static sf::Text gameover("Game over", this->mainFont, 70);
-        gameover.setFillColor(sf::Color::Red);
-        gameover.setOrigin(gameover.getLocalBounds().width / 2, gameover.getLocalBounds().height / 2);
-        gameover.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
+        static std::vector<sf::Text> texts{sf::Text("Game over", this->mainFont, 70), 
+                                           sf::Text("Restart", this->mainFont, 50),
+                                           sf::Text("Exit", this->mainFont, 50)};
+        for (unsigned int i = 0; i < texts.size(); ++i) {
+            texts[i].setFillColor(sf::Color::Red);
+            texts[i].setOrigin(texts[i].getLocalBounds().width / 2, texts[i].getLocalBounds().height / 2);
+            texts[i].setPosition(sf::Vector2f((this->window).getSize().x / 2, (this->window).getSize().y / 2 + (i - texts.size() / 2) * 70));
+            texts[i].setOutlineColor(sf::Color::White);
+            texts[i].setOutlineThickness(0);
+        }
+        unsigned int actualMenuPosition = 0;
+        if (this->menuPosition == GameStatus::RESTART) {
+            actualMenuPosition = 1;
+        } else {
+            actualMenuPosition = 2;
+        }
+        texts[actualMenuPosition].setOutlineThickness(2);
         (this->window).clear(sf::Color::Black);
         this->drawFields();
         this->drawScoresAndLines();
-        (this->window).draw(gameover);
+        for (const auto &text : texts) {
+            (this->window).draw(text);
+        }
         (this->window).display();
     }
     void Game::uploadHighScore(void) {
@@ -302,5 +334,29 @@ namespace gamestuff {
             }
         }
         return true;
+    }
+    void Game::restartGame(void) {
+        this->scores = 0;
+        this->totalLinesRemoved = 0;
+        this->speedInMilSec = SpeedInMilliSec::START_SPEED;
+        this->status = GameStatus::GAME_IS_ON;
+        this->menuPosition = GameStatus::RESTART;
+        this->blockMovement = false;
+        this->fallingShape = nullptr;
+        this->nextShape = nullptr;
+        if (this->linesForDestroy.size()) {
+            this->linesForDestroy.erase(linesForDestroy.begin(), linesForDestroy.end());
+        }    
+        for (auto &line : this->field) {
+            for (auto &cell : line) {
+                cell = sf::Color::Transparent;
+            }
+        }
+        for (auto &line : this->nextShapeField) {
+            for (auto &cell : line) {
+                cell = sf::Color::Transparent;
+            }
+        }
+        this->chooseNewShape();
     }
 } // namespace gamestuff

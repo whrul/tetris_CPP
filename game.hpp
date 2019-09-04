@@ -33,6 +33,8 @@ namespace gamestuff {
         GAME_IS_ON = 0,
         PAUSE,
         GAME_OVER,
+        RESTART,
+        EXIT,
     };
     class Game {
         unsigned long long scores;
@@ -40,6 +42,7 @@ namespace gamestuff {
         unsigned long long totalLinesRemoved;
         int speedInMilSec;
         GameStatus status;
+        GameStatus menuPosition;
         bool blockMovement;
         std::list<std::vector<sf::Color>> field;
         std::list<std::vector<sf::Color>> nextShapeField;
@@ -61,6 +64,7 @@ namespace gamestuff {
         void drawGameOverImage(void);
         void uploadHighScore(void);
         void saveHighScore(void);
+        void restartGame();
       public:
         Game(void);
         ~Game();
