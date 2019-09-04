@@ -33,6 +33,8 @@ namespace gamestuff {
         GAME_IS_ON = 0,
         PAUSE,
         GAME_OVER,
+        RESTART,
+        EXIT,
     };
     class Game {
         unsigned long long scores;
@@ -40,6 +42,8 @@ namespace gamestuff {
         unsigned long long totalLinesRemoved;
         int speedInMilSec;
         GameStatus status;
+        GameStatus menuPosition;
+        bool blockMovement;
         std::list<std::vector<sf::Color>> field;
         std::list<std::vector<sf::Color>> nextShapeField;
         sf::RenderWindow window;
@@ -47,17 +51,20 @@ namespace gamestuff {
         gamestuff::Shape *nextShape;
         std::vector<gamestuff::Shape*> shapes; //bad alloc except
         sf::Font mainFont;
+        std::vector<int> linesForDestroy;
         void createFields(void);//should clear if not empty?
         void redrawAndShow(void);
         void drawFields(void);
         bool chooseNewShape(void);
-        void removeFullLines(void);
+        int removeFullLines(void);
+        int dropAllDown(void);
         void createShapes(void);
         void drawScoresAndLines(void);
         void drawPauseImage(void);
         void drawGameOverImage(void);
         void uploadHighScore(void);
         void saveHighScore(void);
+        void restartGame();
       public:
         Game(void);
         ~Game();

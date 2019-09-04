@@ -6,6 +6,8 @@ namespace gamestuff {
                        totalLinesRemoved(0),
                        speedInMilSec(SpeedInMilliSec::START_SPEED),
                        status(GameStatus::GAME_IS_ON),
+                       menuPosition(GameStatus::RESTART),
+                       blockMovement(false),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr),
                        nextShape(nullptr) {
@@ -32,13 +34,13 @@ namespace gamestuff {
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
-                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && this->status == GameStatus::GAME_IS_ON) {
+                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
                         this->fallingShape->moveSide(this->field, 1);
-                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && this->status == GameStatus::GAME_IS_ON) {
+                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
                         this->fallingShape->moveSide(this->field, -1);
-                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_IS_ON) {
+                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
                         this->fallingShape->rotate(this->field);
-                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_IS_ON) {
+                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
                         if (this->fallingShape->fall(this->field)){
                             ++(this->scores);
                         }
@@ -51,6 +53,22 @@ namespace gamestuff {
                             std::cout << "Your scores: " << this->scores << std::endl;
                             std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
                             window.close();
+                        }
+                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_OVER) {
+                        if (this->menuPosition == GameStatus::EXIT) {
+                            this->menuPosition = GameStatus::RESTART;
+                        }
+                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_OVER) {
+                        if (this->menuPosition == GameStatus::RESTART) {
+                            this->menuPosition = GameStatus::EXIT;
+                        }
+                    } else if (event.key.code == sf::Keyboard::Return && this->status == GameStatus::GAME_OVER) {
+                        if (this->menuPosition == GameStatus::EXIT) {
+                            std::cout << "Your scores: " << this->scores << std::endl;
+                            std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
+                            window.close();
+                        } else {
+                            this->restartGame();
                         }
                     }
                 }
@@ -86,14 +104,26 @@ namespace gamestuff {
     void Game::redrawAndShow(void) {
         static sf::Clock clock;
         static int maxSpeed = SpeedInMilliSec::MAX_SPEED; 
+        int linesRemoved = 0;
         if (clock.getElapsedTime().asMilliseconds() > std::max(this->speedInMilSec, maxSpeed)) {
-            if (!this->fallingShape->fall(field)) {
-                this->removeFullLines();
+            if(this->dropAllDown()){
                 if(!this->chooseNewShape()) {
                     this->status = GameStatus::GAME_OVER;
                     this->highScore = std::max(this->highScore, this->scores);
                     this->saveHighScore();
                     return;
+                }
+                this->blockMovement = false;
+            } else if (!this->fallingShape->fall(field)) {
+                linesRemoved = this->removeFullLines();
+                if(!linesRemoved && !this->chooseNewShape()) {
+                    this->status = GameStatus::GAME_OVER;
+                    this->highScore = std::max(this->highScore, this->scores);
+                    this->saveHighScore();
+                    return;
+                }
+                if (linesRemoved) {
+                    this->blockMovement = true;
                 }
             }
             clock.restart();
@@ -148,7 +178,7 @@ namespace gamestuff {
         this->fallingShape->setPosition(0, startIndexJ); 
         return true;
     }
-    void Game::removeFullLines(void) {
+    int Game::removeFullLines(void) {
         bool shouldRemove = true;
         int linesRemoved = 0;
         for (unsigned int i = 0; i < field.size(); ++i) {
@@ -160,21 +190,38 @@ namespace gamestuff {
                 }
             }
             if (shouldRemove) {
-                (this->field).erase(std::next((this->field).begin(), i));
-                (this->field).push_front({});
-                unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
-                for (unsigned int i = 0; i < cellsInRow; ++i) {
-                    (*(this->field).begin()).push_back(sf::Color::Transparent);
+                for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
+                    (*std::next((this->field).begin(), i))[j] = sf::Color::Transparent;
                 }
                 ++linesRemoved;
                 ++(this->totalLinesRemoved);
+                this->linesForDestroy.push_back(i);
+            }
+        }
+        return linesRemoved;
+    }
+    int Game::dropAllDown(void) {
+        if (this->linesForDestroy.empty()) {
+            return 0;
+        }
+        for (int i = this->linesForDestroy.size() - 1; i >= 0; --i) {
+            (this->field).erase(std::next((this->field).begin(), this->linesForDestroy[i]));
+        }
+        for (unsigned int i = 0; i < this->linesForDestroy.size(); ++i) {
+            (this->field).push_front({});
+            unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
+            for (unsigned int j = 0; j < cellsInRow; ++j) {
+                (*(this->field).begin()).push_back(sf::Color::Transparent);
             }
         }
         static int speedStep = SpeedInMilliSec::SPEED_INCR_STEP;
-        this->scores += 100 * linesRemoved * linesRemoved;
-        if (linesRemoved && !(this->totalLinesRemoved % 10)) {
+        this->scores += 100 * this->linesForDestroy.size() * this->linesForDestroy.size();
+        if (!(this->totalLinesRemoved % 10)) {
             this->speedInMilSec -= (this->speedInMilSec > 0) ? speedStep : 0;
         }
+        int linesDroped = this->linesForDestroy.size();
+        this->linesForDestroy.erase(this->linesForDestroy.begin(), this->linesForDestroy.end());
+        return linesDroped;
     }
     void Game::createShapes(void) {
         (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Cyan));
@@ -214,14 +261,29 @@ namespace gamestuff {
         (this->window).display();
     }
     void Game::drawGameOverImage(void) {
-        static sf::Text gameover("Game over", this->mainFont, 70);
-        gameover.setFillColor(sf::Color::Red);
-        gameover.setOrigin(gameover.getLocalBounds().width / 2, gameover.getLocalBounds().height / 2);
-        gameover.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
+        static std::vector<sf::Text> texts{sf::Text("Game over", this->mainFont, 70), 
+                                           sf::Text("Restart", this->mainFont, 50),
+                                           sf::Text("Exit", this->mainFont, 50)};
+        for (unsigned int i = 0; i < texts.size(); ++i) {
+            texts[i].setFillColor(sf::Color::Red);
+            texts[i].setOrigin(texts[i].getLocalBounds().width / 2, texts[i].getLocalBounds().height / 2);
+            texts[i].setPosition(sf::Vector2f((this->window).getSize().x / 2, (this->window).getSize().y / 2 + (i - texts.size() / 2) * 70));
+            texts[i].setOutlineColor(sf::Color::White);
+            texts[i].setOutlineThickness(0);
+        }
+        unsigned int actualMenuPosition = 0;
+        if (this->menuPosition == GameStatus::RESTART) {
+            actualMenuPosition = 1;
+        } else {
+            actualMenuPosition = 2;
+        }
+        texts[actualMenuPosition].setOutlineThickness(2);
         (this->window).clear(sf::Color::Black);
         this->drawFields();
         this->drawScoresAndLines();
-        (this->window).draw(gameover);
+        for (const auto &text : texts) {
+            (this->window).draw(text);
+        }
         (this->window).display();
     }
     void Game::uploadHighScore(void) {
@@ -272,5 +334,29 @@ namespace gamestuff {
             }
         }
         return true;
+    }
+    void Game::restartGame(void) {
+        this->scores = 0;
+        this->totalLinesRemoved = 0;
+        this->speedInMilSec = SpeedInMilliSec::START_SPEED;
+        this->status = GameStatus::GAME_IS_ON;
+        this->menuPosition = GameStatus::RESTART;
+        this->blockMovement = false;
+        this->fallingShape = nullptr;
+        this->nextShape = nullptr;
+        if (this->linesForDestroy.size()) {
+            this->linesForDestroy.erase(linesForDestroy.begin(), linesForDestroy.end());
+        }    
+        for (auto &line : this->field) {
+            for (auto &cell : line) {
+                cell = sf::Color::Transparent;
+            }
+        }
+        for (auto &line : this->nextShapeField) {
+            for (auto &cell : line) {
+                cell = sf::Color::Transparent;
+            }
+        }
+        this->chooseNewShape();
     }
 } // namespace gamestuff
