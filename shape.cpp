@@ -142,10 +142,27 @@ namespace gamestuff {
         }
         return true;
     }
+    void Shape::setOriginalMap(void) {
+        if (this->shapeMap.empty()) {
+            for (unsigned int i = 0; i < this->originalShapeMap.size(); ++i) {
+                this->shapeMap.push_back({});
+                for (unsigned int j = 0; j < this->originalShapeMap[i].size(); ++j ) {
+                    this->shapeMap[i].push_back(this->originalShapeMap[i][j]);
+                }
+            }
+        } else {
+            for (unsigned int i = 0; i < this->originalShapeMap.size(); ++i) {
+                for (unsigned int j = 0; j < this->originalShapeMap[i].size(); ++j ) {
+                    this->shapeMap[i][j] = this->originalShapeMap[i][j];
+                }
+            }
+        }
+    }
     OBlock::OBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 1 && ShapeSize::MAX_CELLS_IN_ROW > 1) {
-            (this->shapeMap).push_back({1, 1});
-            (this->shapeMap).push_back({1, 1});
+            (this->originalShapeMap).push_back({1, 1});
+            (this->originalShapeMap).push_back({1, 1});
+            this->setOriginalMap();
         }
     }
     bool OBlock::rotate(std::list<std::vector<sf::Color>> &field){
@@ -153,45 +170,51 @@ namespace gamestuff {
     }
     TBlock::TBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 2 && ShapeSize::MAX_CELLS_IN_ROW > 2) {
-            (this->shapeMap).push_back({0, 1, 0});
-            (this->shapeMap).push_back({1, 1, 1});
-            (this->shapeMap).push_back({0, 0, 0});
+            (this->originalShapeMap).push_back({0, 1, 0});
+            (this->originalShapeMap).push_back({1, 1, 1});
+            (this->originalShapeMap).push_back({0, 0, 0});
+            this->setOriginalMap();
         }
     }
     ZBlock::ZBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 2 && ShapeSize::MAX_CELLS_IN_ROW > 2) {
-            (this->shapeMap).push_back({1, 1, 0});
-            (this->shapeMap).push_back({0, 1, 1});
-            (this->shapeMap).push_back({0, 0, 0});
+            (this->originalShapeMap).push_back({1, 1, 0});
+            (this->originalShapeMap).push_back({0, 1, 1});
+            (this->originalShapeMap).push_back({0, 0, 0});
+            this->setOriginalMap();
         }
     }
     SBlock::SBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 2 && ShapeSize::MAX_CELLS_IN_ROW > 2) {
-            (this->shapeMap).push_back({0, 1, 1});
-            (this->shapeMap).push_back({1, 1, 0});
-            (this->shapeMap).push_back({0, 0, 0});
+            (this->originalShapeMap).push_back({0, 1, 1});
+            (this->originalShapeMap).push_back({1, 1, 0});
+            (this->originalShapeMap).push_back({0, 0, 0});
+            this->setOriginalMap();
         }
     }
     JBlock::JBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 2 && ShapeSize::MAX_CELLS_IN_ROW > 2) {
-            (this->shapeMap).push_back({1, 0, 0});
-            (this->shapeMap).push_back({1, 1, 1});
-            (this->shapeMap).push_back({0, 0, 0});
+            (this->originalShapeMap).push_back({1, 0, 0});
+            (this->originalShapeMap).push_back({1, 1, 1});
+            (this->originalShapeMap).push_back({0, 0, 0});
+            this->setOriginalMap();
         }
     }
     LBlock::LBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 2 && ShapeSize::MAX_CELLS_IN_ROW > 2) {
-            (this->shapeMap).push_back({0, 0, 1});
-            (this->shapeMap).push_back({1, 1, 1});
-            (this->shapeMap).push_back({0, 0, 0});
+            (this->originalShapeMap).push_back({0, 0, 1});
+            (this->originalShapeMap).push_back({1, 1, 1});
+            (this->originalShapeMap).push_back({0, 0, 0});
+            this->setOriginalMap();
         }
     }
     IBlock::IBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 3 && ShapeSize::MAX_CELLS_IN_ROW > 3) {
-            (this->shapeMap).push_back({0, 0, 1, 0});
-            (this->shapeMap).push_back({0, 0, 1, 0});
-            (this->shapeMap).push_back({0, 0, 1, 0});
-            (this->shapeMap).push_back({0, 0, 1, 0});
+            (this->originalShapeMap).push_back({0, 0, 1, 0});
+            (this->originalShapeMap).push_back({0, 0, 1, 0});
+            (this->originalShapeMap).push_back({0, 0, 1, 0});
+            (this->originalShapeMap).push_back({0, 0, 1, 0});
+            this->setOriginalMap();
         }
     }
 } // namespace gamestuff

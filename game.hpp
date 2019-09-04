@@ -58,7 +58,7 @@ namespace gamestuff {
         bool chooseNewShape(void);
         int removeFullLines(void);
         int dropAllDown(void);
-        void createShapes(void);
+        void createShapes(void); //if size == 0;
         void drawScoresAndLines(void);
         void drawPauseImage(void);
         void drawGameOverImage(void);

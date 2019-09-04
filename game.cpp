@@ -157,6 +157,9 @@ namespace gamestuff {
     }
     bool Game::chooseNewShape(void) {
         static int startIndexJ = FieldSize::CELLS_IN_ROW / 2 - ShapeSize::MAX_CELLS_IN_ROW / 2;
+        if (this->fallingShape != nullptr) {
+            this->fallingShape->setOriginalMap();
+        }
         if (this->nextShape != nullptr) {
             this->fallingShape = this->nextShape;
         } else {
