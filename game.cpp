@@ -283,12 +283,13 @@ namespace gamestuff {
                                            sf::Text("Restart", this->mainFont, 50),
                                            sf::Text("Exit", this->mainFont, 50)};
         for (unsigned int i = 0; i < texts.size(); ++i) {
-            texts[i].setFillColor(sf::Color(255, 15, 15));
+            texts[i].setFillColor(sf::Color(15, 15, 255));
             texts[i].setOrigin(texts[i].getLocalBounds().width / 2, texts[i].getLocalBounds().height / 2);
             texts[i].setPosition(sf::Vector2f((this->window).getSize().x / 2, (this->window).getSize().y / 2 + (i - texts.size() / 2) * 70));
             texts[i].setOutlineColor(sf::Color::White);
             texts[i].setOutlineThickness(0);
         }
+        texts[0].setFillColor(sf::Color(255, 15, 15));
         texts[0].setOutlineThickness(2);
         unsigned int actualMenuPosition = 0;
         if (this->menuPosition == GameStatus::RESTART) {
