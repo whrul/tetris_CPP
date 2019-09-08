@@ -22,7 +22,7 @@ namespace gamestuff {
         std::vector<std::vector<int>> originalShapeMap;
         bool canMoveSide(const std::list<std::vector<sf::Color>> &field, const int direction) const;
         bool canFall(const std::list<std::vector<sf::Color>> &field) const;
-        bool canRotate(std::list<std::vector<sf::Color>> &field, std::vector<std::vector<int>> &newShapeMap);
+        bool canRotate(std::list<std::vector<sf::Color>> &field, std::vector<std::vector<int>> &newShapeMap) const;
         sf::Color mainColor;
       public:
         Shape(int leftTopCornerI, int leftTopCornerJ, sf::Color color);

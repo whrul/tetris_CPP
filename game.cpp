@@ -1,7 +1,7 @@
 #include "game.hpp"
 
 namespace gamestuff {
-    Game::Game(void) : canNotLaunchTheGame(false),
+    Game::Game(void) : canAllocMemory(true),
                        scores(0),
                        highScore(0),
                        totalLinesRemoved(0),
@@ -15,7 +15,7 @@ namespace gamestuff {
         srand(time(NULL));
         this->createFields();
         this->createShapes();
-        if (!this->canNotLaunchTheGame) {
+        if (this->canAllocMemory) {
             this->chooseNewShape();
             (this->mainFont).loadFromFile("font.ttf");
             (this->window).setVerticalSyncEnabled(true);
@@ -28,7 +28,7 @@ namespace gamestuff {
         }
     }
     void Game::startGame(void) {
-        if (this->canNotLaunchTheGame) {
+        if (!this->canAllocMemory) {
             return;
         }
         while ((this->window).isOpen()) {
@@ -80,10 +80,10 @@ namespace gamestuff {
                 }
             }
             if (this->status == GameStatus::GAME_IS_ON) {
-                this->redrawAndShow();
+                this->drawGameOnImage();
             } else if(this->status == GameStatus::PAUSE){
                 this->drawPauseImage();
-            } else if(this->status == GameStatus::GAME_OVER) {
+            } else {
                 this->drawGameOverImage();
             }
         }
@@ -107,7 +107,7 @@ namespace gamestuff {
             }
         }
     }
-    void Game::redrawAndShow(void) {
+    void Game::drawGameOnImage(void) {
         static sf::Clock clock;
         static int maxSpeed = SpeedInMilliSec::MAX_SPEED; 
         int linesRemoved = 0;
@@ -242,35 +242,34 @@ namespace gamestuff {
             (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
             (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
         } catch(std::bad_alloc& ex) {
-            for (int i = (this->shapes).size() - 1; i >= 0; --i) {
-                delete (this->shapes)[i];
-            }
             std::cerr << "Do not enough memory.\nThe game can not be launched.\n";
-            this->canNotLaunchTheGame = true;
+            this->canAllocMemory = false;
         }
         
     }
     void Game::drawScoresAndLines(void) {
-        static sf::Text scores("It's string", this->mainFont, 30);
+        static int POS_X = FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE;
+
+        static sf::Text scores("It's string", this->mainFont, Fonts::SCORES_F);
         scores.setString("Scores: " + std::to_string(this->scores));
         scores.setFillColor(sf::Color::White);
-        scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE));
+        scores.setPosition(sf::Vector2f(POS_X, Fonts::SCORES_Y_POS));
         (this->window).draw(scores);
         
-        static sf::Text lines("It's string", this->mainFont, 30);
+        static sf::Text lines("It's string", this->mainFont, Fonts::SCORES_F);
         scores.setString("Lines: " + std::to_string(this->totalLinesRemoved));
         scores.setFillColor(sf::Color::White);
-        scores.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize()));
+        scores.setPosition(sf::Vector2f(POS_X, Fonts::LINES_Y_POS));
         (this->window).draw(scores);
         
-        static sf::Text highScore("It's string", this->mainFont, 30);
+        static sf::Text highScore("It's string", this->mainFont, Fonts::SCORES_F);
         highScore.setString("High score: " + std::to_string(std::max(this->highScore, this->scores)));
         highScore.setFillColor(sf::Color::White);
-        highScore.setPosition(sf::Vector2f(FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE, FieldSize::MARGIN * 2 + ShapeSize::MAX_CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * scores.getCharacterSize() + 3 * lines.getCharacterSize()));
+        highScore.setPosition(sf::Vector2f(POS_X, Fonts::BEST_SCORE_Y_POS));
         (this->window).draw(highScore);
     }
     void Game::drawPauseImage(void) {
-        static sf::Text pause("Pause..", this->mainFont, 65);
+        static sf::Text pause("Pause..", this->mainFont, Fonts::PAUSE_F);
         pause.setFillColor(sf::Color::White);
         pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
         pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
@@ -279,9 +278,9 @@ namespace gamestuff {
         (this->window).display();
     }
     void Game::drawGameOverImage(void) {
-        static std::vector<sf::Text> texts{sf::Text("Game over", this->mainFont, 70), 
-                                           sf::Text("Restart", this->mainFont, 50),
-                                           sf::Text("Exit", this->mainFont, 50)};
+        static std::vector<sf::Text> texts{sf::Text("Game over", this->mainFont, Fonts::GAME_OVER_F), 
+                                           sf::Text("Restart", this->mainFont, Fonts::MENU_F),
+                                           sf::Text("Exit", this->mainFont, Fonts::MENU_F)};
         for (unsigned int i = 0; i < texts.size(); ++i) {
             texts[i].setFillColor(sf::Color(15, 15, 255));
             texts[i].setOrigin(texts[i].getLocalBounds().width / 2, texts[i].getLocalBounds().height / 2);
@@ -313,7 +312,6 @@ namespace gamestuff {
             std::cout << "Can not open data file.\n";
             return;
         }
-        // dataFile.seekg(0);
         std::getline(dataFile, scores);
         if (dataFile.bad() || dataFile.fail()) {
             std::cout << "Can not read from data file.\n";

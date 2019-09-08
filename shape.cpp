@@ -84,7 +84,7 @@ namespace gamestuff {
         this -> leftTopCornI = leftTopCornerI;
         this -> leftTopCornJ = leftTopCornerJ;
     }
-    bool Shape::canRotate(std::list<std::vector<sf::Color>> &field, std::vector<std::vector<int>> &newShapeMap) {
+    bool Shape::canRotate(std::list<std::vector<sf::Color>> &field, std::vector<std::vector<int>> &newShapeMap) const {
         this->hide(field);
         for (unsigned int i = 0; i < newShapeMap.size(); ++i) {
             for (unsigned int j = 0; j < newShapeMap[i].size(); ++j){

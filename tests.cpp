@@ -10,6 +10,6 @@ namespace gamestuff {
                ShapeSize::MAX_CELLS_IN_ROW > 0 &&
                ShapeSize::MAX_CELLS_IN_COL < FieldSize::CELLS_IN_COL &&
                ShapeSize::MAX_CELLS_IN_ROW < FieldSize::CELLS_IN_ROW);
-        std::cout << "checkFieldAndShapesSizes() passed.\n";
+        std::cout << "test checkFieldAndShapesSizes() passed.\n";
     }
 } // namespace gamestuff

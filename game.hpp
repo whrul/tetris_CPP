@@ -36,8 +36,17 @@ namespace gamestuff {
         RESTART,
         EXIT,
     };
+    enum Fonts {
+        SCORES_F = 30,
+        PAUSE_F = 65,
+        GAME_OVER_F = 70,
+        MENU_F = 50,
+        SCORES_Y_POS = 270,
+        LINES_Y_POS = 320,
+        BEST_SCORE_Y_POS = 410,
+    };
     class Game {
-        bool canNotLaunchTheGame;
+        bool canAllocMemory;
         unsigned long long scores;
         unsigned long long highScore;
         unsigned long long totalLinesRemoved;
@@ -54,7 +63,7 @@ namespace gamestuff {
         sf::Font mainFont;
         std::vector<int> linesForDestroy;
         void createFields(void);
-        void redrawAndShow(void);
+        void drawGameOnImage(void);
         void drawFields(void);
         bool chooseNewShape(void);
         int removeFullLines(void);
