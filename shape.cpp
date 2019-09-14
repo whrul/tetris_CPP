@@ -158,6 +158,20 @@ namespace gamestuff {
             }
         }
     }
+    void Shape::markShadowLocation(const std::list<std::vector<sf::Color>> &gameField, std::list<std::vector<sf::Color>> &emptyField) {
+        int tempI = this->leftTopCornI;
+        while (this->canFall(gameField)) {
+            ++leftTopCornI;
+        }
+        for (unsigned int i = 0; i < (this->shapeMap).size(); ++i) {
+            for (unsigned int j = 0; j < (this->shapeMap)[i].size(); ++j){
+                if ((this->shapeMap)[i][j]) {
+                    (*std::next(emptyField.begin(), this->leftTopCornI + i))[this->leftTopCornJ + j] = this->mainColor;           
+                }
+            }
+        }
+        this->leftTopCornI = tempI;
+    }
     OBlock::OBlock(int leftTopCornerI, int leftTopCornerJ, sf::Color color) : Shape(leftTopCornerI, leftTopCornerJ, color){
         if ((ShapeSize::MAX_CELLS_IN_COL) > 1 && ShapeSize::MAX_CELLS_IN_ROW > 1) {
             (this->originalShapeMap).push_back({1, 1});

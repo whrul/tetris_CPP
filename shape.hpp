@@ -36,6 +36,7 @@ namespace gamestuff {
         virtual void justForMakingShapeClassAbstract(void) = 0;
         bool canDraw(std::list<std::vector<sf::Color>> &field) const;
         void setOriginalMap(void);
+        void markShadowLocation(const std::list<std::vector<sf::Color>> &gameField, std::list<std::vector<sf::Color>> &emptyField);
     };
     class OBlock : public Shape {
         void justForMakingShapeClassAbstract(void) override{};
