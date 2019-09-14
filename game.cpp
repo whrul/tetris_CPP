@@ -6,20 +6,23 @@ namespace gamestuff {
                        highScore(0),
                        totalLinesRemoved(0),
                        speedInMilSec(SpeedInMilliSec::START_SPEED),
-                       status(GameStatus::GAME_IS_ON),
+                       gameStatus(GameStatus::GAME_IS_ON),
                        menuPosition(GameStatus::RESTART),
                        blockMovement(false),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr),
                        nextShape(nullptr) {
+        this->createShapes();
+        if (!this->canAllocMemory) {
+            return;
+        }
         srand(time(NULL));
         this->createFields();
-        this->createShapes();
-        if (this->canAllocMemory) {
-            this->chooseNewShape();
-            (this->mainFont).loadFromFile("font.ttf");
-            (this->window).setVerticalSyncEnabled(true);
-            this->uploadHighScore();
+        this->chooseNewShape();
+        (this->window).setVerticalSyncEnabled(true);
+        this->uploadHighScore();
+        if (!(this->mainFont).loadFromFile("font.ttf")) {
+            std::cerr << "Can not upload font from font.tff.\n";
         }
     }
     Game::~Game() {
@@ -35,53 +38,16 @@ namespace gamestuff {
             sf::Event event;
             while (window.pollEvent(event)) {
                 if (event.type == sf::Event::Closed) {
-                    std::cout << "Your scores: " << this->scores << std::endl;
-                    std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
+                    this->writeScoresInfoInTerminal();
                     window.close();
                 }
                 if (event.type == sf::Event::KeyPressed) {
-                    if ((event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
-                        this->fallingShape->moveSide(this->field, 1);
-                    } else if ((event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
-                        this->fallingShape->moveSide(this->field, -1);
-                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
-                        this->fallingShape->rotate(this->field);
-                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_IS_ON && !(this->blockMovement)) {
-                        if (this->fallingShape->fall(this->field)){
-                            ++(this->scores);
-                        }
-                    } else if (event.key.code == sf::Keyboard::Escape) {
-                        if (this->status == GameStatus::GAME_IS_ON) {
-                            this->status = GameStatus::PAUSE;
-                        } else if(this->status == GameStatus::PAUSE) {
-                            this->status = GameStatus::GAME_IS_ON;
-                        } else if(this->status == GameStatus::GAME_OVER) {
-                            std::cout << "Your scores: " << this->scores << std::endl;
-                            std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
-                            window.close();
-                        }
-                    } else if ((event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up) && this->status == GameStatus::GAME_OVER) {
-                        if (this->menuPosition == GameStatus::EXIT) {
-                            this->menuPosition = GameStatus::RESTART;
-                        }
-                    } else if ((event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down) && this->status == GameStatus::GAME_OVER) {
-                        if (this->menuPosition == GameStatus::RESTART) {
-                            this->menuPosition = GameStatus::EXIT;
-                        }
-                    } else if (event.key.code == sf::Keyboard::Return && this->status == GameStatus::GAME_OVER) {
-                        if (this->menuPosition == GameStatus::EXIT) {
-                            std::cout << "Your scores: " << this->scores << std::endl;
-                            std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
-                            window.close();
-                        } else {
-                            this->restartGame();
-                        }
-                    }
+                   this->keyPressed(event.key.code);
                 }
             }
-            if (this->status == GameStatus::GAME_IS_ON) {
+            if (this->gameStatus == GameStatus::GAME_IS_ON) {
                 this->drawGameOnImage();
-            } else if(this->status == GameStatus::PAUSE){
+            } else if(this->gameStatus == GameStatus::PAUSE){
                 this->drawPauseImage();
             } else {
                 this->drawGameOverImage();
@@ -89,22 +55,11 @@ namespace gamestuff {
         }
     }
     void Game::createFields(void) {
-        unsigned int cellsInCol = FieldSize::CELLS_IN_COL;
-        unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
-        for (unsigned int i = 0; i < cellsInCol; ++i) {
-            (this->field).push_back({});
-            for (unsigned int j = 0; j < cellsInRow; ++j) {
-                (*std::next((this->field).begin(), i)).push_back(sf::Color::Transparent);
-            }
+        for (unsigned int i = 0; i < FieldSize::CELLS_IN_COL; ++i) {
+            (this->field).push_back(std::vector<sf::Color>(FieldSize::CELLS_IN_ROW, sf::Color::Transparent));
         }
-
-        cellsInCol = ShapeSize::MAX_CELLS_IN_COL;
-        cellsInRow = ShapeSize::MAX_CELLS_IN_ROW;
-        for (unsigned int i = 0; i < cellsInCol; ++i) {
-            (this->nextShapeField).push_back({});
-            for (unsigned int j = 0; j < cellsInRow; ++j) {
-                (*std::next((this->nextShapeField).begin(), i)).push_back(sf::Color::Transparent);
-            }
+        for (unsigned int i = 0; i < ShapeSize::MAX_CELLS_IN_COL; ++i) {
+            (this->nextShapeField).push_back(std::vector<sf::Color>(ShapeSize::MAX_CELLS_IN_ROW, sf::Color::Transparent));
         }
     }
     void Game::drawGameOnImage(void) {
@@ -114,7 +69,7 @@ namespace gamestuff {
         if (clock.getElapsedTime().asMilliseconds() > std::max(this->speedInMilSec, maxSpeed)) {
             if(this->dropAllDown()){
                 if(!this->chooseNewShape()) {
-                    this->status = GameStatus::GAME_OVER;
+                    this->gameStatus = GameStatus::GAME_OVER;
                     this->highScore = std::max(this->highScore, this->scores);
                     this->saveHighScore();
                     return;
@@ -123,7 +78,7 @@ namespace gamestuff {
             } else if (!this->fallingShape->fall(field)) {
                 linesRemoved = this->removeFullLines();
                 if(!linesRemoved && !this->chooseNewShape()) {
-                    this->status = GameStatus::GAME_OVER;
+                    this->gameStatus = GameStatus::GAME_OVER;
                     this->highScore = std::max(this->highScore, this->scores);
                     this->saveHighScore();
                     return;
@@ -187,9 +142,9 @@ namespace gamestuff {
         this->fallingShape->setPosition(0, startIndexJ); 
         return true;
     }
-    int Game::removeFullLines(void) {
+    unsigned int Game::removeFullLines(void) {
         bool shouldRemove = true;
-        int linesRemoved = 0;
+        unsigned int linesRemoved = 0;
         for (unsigned int i = 0; i < field.size(); ++i) {
             shouldRemove = true;
             for (unsigned int j = 0; j < (*std::next((this->field).begin(), i)).size(); ++j) {
@@ -217,11 +172,7 @@ namespace gamestuff {
             (this->field).erase(std::next((this->field).begin(), this->linesForDestroy[i]));
         }
         for (unsigned int i = 0; i < this->linesForDestroy.size(); ++i) {
-            (this->field).push_front({});
-            unsigned int cellsInRow = FieldSize::CELLS_IN_ROW;
-            for (unsigned int j = 0; j < cellsInRow; ++j) {
-                (*(this->field).begin()).push_back(sf::Color::Transparent);
-            }
+            (this->field).push_front(std::vector<sf::Color>(FieldSize::CELLS_IN_ROW, sf::Color::Transparent));
         }
         static int speedStep = SpeedInMilliSec::SPEED_INCR_STEP;
         this->scores += 100 * this->linesForDestroy.size() * this->linesForDestroy.size();
@@ -249,30 +200,25 @@ namespace gamestuff {
     }
     void Game::drawScoresAndLines(void) {
         static int POS_X = FieldSize::MARGIN * 2 + FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE;
-
-        static sf::Text scores("It's string", this->mainFont, Fonts::SCORES_F);
-        scores.setString("Scores: " + std::to_string(this->scores));
-        scores.setFillColor(sf::Color::White);
-        scores.setPosition(sf::Vector2f(POS_X, Fonts::SCORES_Y_POS));
-        (this->window).draw(scores);
-        
-        static sf::Text lines("It's string", this->mainFont, Fonts::SCORES_F);
-        scores.setString("Lines: " + std::to_string(this->totalLinesRemoved));
-        scores.setFillColor(sf::Color::White);
-        scores.setPosition(sf::Vector2f(POS_X, Fonts::LINES_Y_POS));
-        (this->window).draw(scores);
-        
-        static sf::Text highScore("It's string", this->mainFont, Fonts::SCORES_F);
-        highScore.setString("High score: " + std::to_string(std::max(this->highScore, this->scores)));
-        highScore.setFillColor(sf::Color::White);
-        highScore.setPosition(sf::Vector2f(POS_X, Fonts::BEST_SCORE_Y_POS));
-        (this->window).draw(highScore);
+        //scores achieved:
+        sf::Text text("Scores: " + std::to_string(this->scores), this->mainFont, Fonts::SCORES_F);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(sf::Vector2f(POS_X, Fonts::SCORES_Y_POS));
+        (this->window).draw(text);
+        //lines removed:
+        text.setString("Lines: " + std::to_string(this->totalLinesRemoved));
+        text.setPosition(sf::Vector2f(POS_X, Fonts::LINES_Y_POS));
+        (this->window).draw(text);
+        //highscore:
+        text.setString("High score: " + std::to_string(std::max(this->highScore, this->scores)));
+        text.setPosition(sf::Vector2f(POS_X, Fonts::BEST_SCORE_Y_POS));
+        (this->window).draw(text);
     }
     void Game::drawPauseImage(void) {
         static sf::Text pause("Pause..", this->mainFont, Fonts::PAUSE_F);
         pause.setFillColor(sf::Color::White);
-        pause.setOrigin(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2);
-        pause.setPosition((this->window).getSize().x / 2, (this->window).getSize().y / 2);
+        pause.setOrigin(sf::Vector2f(pause.getLocalBounds().width / 2, pause.getLocalBounds().height / 2));
+        pause.setPosition(sf::Vector2f((this->window).getSize().x / 2, (this->window).getSize().y / 2));
         (this->window).clear(sf::Color::Black);
         (this->window).draw(pause);
         (this->window).display();
@@ -282,8 +228,8 @@ namespace gamestuff {
                                            sf::Text("Restart", this->mainFont, Fonts::MENU_F),
                                            sf::Text("Exit", this->mainFont, Fonts::MENU_F)};
         for (unsigned int i = 0; i < texts.size(); ++i) {
-            texts[i].setFillColor(sf::Color(15, 15, 255));
-            texts[i].setOrigin(texts[i].getLocalBounds().width / 2, texts[i].getLocalBounds().height / 2);
+            texts[i].setFillColor(sf::Color(255, 165, 0));
+            texts[i].setOrigin(sf::Vector2f(texts[i].getLocalBounds().width / 2, texts[i].getLocalBounds().height / 2));
             texts[i].setPosition(sf::Vector2f((this->window).getSize().x / 2, (this->window).getSize().y / 2 + (i - texts.size() / 2) * 70));
             texts[i].setOutlineColor(sf::Color::White);
             texts[i].setOutlineThickness(0);
@@ -357,7 +303,7 @@ namespace gamestuff {
         this->scores = 0;
         this->totalLinesRemoved = 0;
         this->speedInMilSec = SpeedInMilliSec::START_SPEED;
-        this->status = GameStatus::GAME_IS_ON;
+        this->gameStatus = GameStatus::GAME_IS_ON;
         this->menuPosition = GameStatus::RESTART;
         this->blockMovement = false;
         this->fallingShape = nullptr;
@@ -376,5 +322,48 @@ namespace gamestuff {
             }
         }
         this->chooseNewShape();
+    }
+    inline void Game::writeScoresInfoInTerminal(void) const {
+        std::cout << "Your scores: " << this->scores << std::endl;
+        std::cout << "Removed lines: " << this->totalLinesRemoved << std::endl;
+    }
+    void Game::keyPressed(const sf::Keyboard::Key &key) {
+        if (this->gameStatus == GameStatus::GAME_IS_ON && !this->blockMovement) {
+            if (key == sf::Keyboard::D || key == sf::Keyboard::Right) {
+                this->fallingShape->moveSide(this->field, 1);
+            } else if (key == sf::Keyboard::A || key == sf::Keyboard::Left) {
+                this->fallingShape->moveSide(this->field, -1);
+            } else if (key == sf::Keyboard::W || key == sf::Keyboard::Up) {
+                this->fallingShape->rotate(this->field);
+            } else if (key == sf::Keyboard::S || key == sf::Keyboard::Down) {
+                if (this->fallingShape->fall(this->field)){
+                    // ++(this->scores);
+                }
+            }
+        }
+        if (key == sf::Keyboard::Escape) {
+            if (this->gameStatus == GameStatus::GAME_IS_ON) {
+                this->gameStatus = GameStatus::PAUSE;
+            } else if(this->gameStatus == GameStatus::PAUSE) {
+                this->gameStatus = GameStatus::GAME_IS_ON;
+            } else if(this->gameStatus == GameStatus::GAME_OVER) {
+                this->writeScoresInfoInTerminal();
+                window.close();
+            }
+        }
+        if (this->gameStatus == GameStatus::GAME_OVER) {
+            if (key == sf::Keyboard::W || key == sf::Keyboard::Up) {
+                this->menuPosition = GameStatus::RESTART;
+            } else if (key == sf::Keyboard::S || key == sf::Keyboard::Down) {
+                this->menuPosition = GameStatus::EXIT;
+            } else if(key == sf::Keyboard::Return) {
+                if (this->menuPosition == GameStatus::EXIT) {
+                    this->writeScoresInfoInTerminal();
+                    window.close();
+                } else {
+                   this->restartGame();
+                }
+            }
+        }
     }
 } // namespace gamestuff

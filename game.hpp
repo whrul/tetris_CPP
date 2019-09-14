@@ -51,7 +51,7 @@ namespace gamestuff {
         unsigned long long highScore;
         unsigned long long totalLinesRemoved;
         int speedInMilSec;
-        GameStatus status;
+        GameStatus gameStatus;
         GameStatus menuPosition;
         bool blockMovement;
         std::list<std::vector<sf::Color>> field;
@@ -66,7 +66,7 @@ namespace gamestuff {
         void drawGameOnImage(void);
         void drawFields(void);
         bool chooseNewShape(void);
-        int removeFullLines(void);
+        unsigned int removeFullLines(void);
         int dropAllDown(void);
         void createShapes(void);
         void drawScoresAndLines(void);
@@ -75,6 +75,8 @@ namespace gamestuff {
         void uploadHighScore(void);
         void saveHighScore(void);
         void restartGame();
+        inline void writeScoresInfoInTerminal(void) const;
+        void keyPressed(const sf::Keyboard::Key &key);
       public:
         Game(void);
         ~Game();
