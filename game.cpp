@@ -11,7 +11,9 @@ namespace gamestuff {
                        blockMovement(false),
                        window(sf::VideoMode(FieldSize::CELLS_IN_ROW * FieldSize::CELL_SIZE + FieldSize::MARGIN + FieldSize::MARGIN_RIGHT, FieldSize::CELLS_IN_COL * FieldSize::CELL_SIZE + 2 * FieldSize::MARGIN), "Tetris"),
                        fallingShape(nullptr),
-                       nextShape(nullptr) {
+                       nextShape(nullptr),
+                       showShadow(true),
+                       emptyField(FieldSize::CELLS_IN_COL, std::vector<sf::Color>(FieldSize::CELLS_IN_ROW, sf::Color::Transparent)) {
         this->createShapes();
         if (!this->canAllocMemory) {
             return;
@@ -91,8 +93,29 @@ namespace gamestuff {
         }
         (this->window).clear(sf::Color::Black);        
         this->drawFields();
+        if (this->showShadow) {
+            this->drawShadow();
+        }
         this->drawScoresAndLines();
         (this->window).display();
+    }
+    void Game::drawShadow(void) {
+        static sf::RectangleShape cell(sf::Vector2f(FieldSize::CELL_SIZE, FieldSize::CELL_SIZE));
+        cell.setFillColor(sf::Color::Transparent);
+        cell.setOutlineThickness(1);
+        this->fallingShape->markShadowLocation(this->field, this->emptyField);
+        for (unsigned int i = 0; i < (this->emptyField).size(); ++i) {
+            for (unsigned int j = 0; j < (*std::next((this->emptyField).begin(), i)).size(); ++j) {
+                if ((*std::next((this->emptyField).begin(), i))[j] != sf::Color::Transparent) {
+                    if ((*std::next((this->field).begin(), i))[j] == sf::Color::Transparent) {
+                        cell.setPosition(sf::Vector2f(FieldSize::MARGIN + FieldSize::CELL_SIZE * j, FieldSize::MARGIN + FieldSize::CELL_SIZE * i)); 
+                        cell.setOutlineColor((*std::next((this->emptyField).begin(), i))[j]);
+                        window.draw(cell);
+                    }
+                    (*std::next((this->emptyField).begin(), i))[j] = sf::Color::Transparent;
+                }
+            }
+        }
     }
     void Game::drawFields(void) {
         static sf::RectangleShape cell(sf::Vector2f(FieldSize::CELL_SIZE, FieldSize::CELL_SIZE));
@@ -185,13 +208,13 @@ namespace gamestuff {
     }
     void Game::createShapes(void) {
         try{
-            (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Cyan));
-            (this->shapes).push_back(new gamestuff::TBlock(0, 0, sf::Color::Red));
-            (this->shapes).push_back(new gamestuff::ZBlock(0, 0, sf::Color::Yellow));
-            (this->shapes).push_back(new gamestuff::SBlock(0, 0, sf::Color::Blue));
-            (this->shapes).push_back(new gamestuff::JBlock(0, 0, sf::Color::Green));
-            (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color::Magenta));
-            (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::White));
+            (this->shapes).push_back(new gamestuff::OBlock(0, 0, sf::Color::Yellow));
+            (this->shapes).push_back(new gamestuff::TBlock(0, 0, sf::Color::Magenta));
+            (this->shapes).push_back(new gamestuff::ZBlock(0, 0, sf::Color::Red));
+            (this->shapes).push_back(new gamestuff::SBlock(0, 0, sf::Color::Green));
+            (this->shapes).push_back(new gamestuff::JBlock(0, 0, sf::Color::Blue));
+            (this->shapes).push_back(new gamestuff::LBlock(0, 0, sf::Color(255, 165, 0)));
+            (this->shapes).push_back(new gamestuff::IBlock(0, 0, sf::Color::Cyan));
         } catch(std::bad_alloc& ex) {
             std::cerr << "Do not enough memory.\nThe game can not be launched.\n";
             this->canAllocMemory = false;
@@ -210,6 +233,7 @@ namespace gamestuff {
         text.setPosition(sf::Vector2f(POS_X, Fonts::LINES_Y_POS));
         (this->window).draw(text);
         //highscore:
+        text.setFillColor(sf::Color::Green);
         text.setString("High score: " + std::to_string(std::max(this->highScore, this->scores)));
         text.setPosition(sf::Vector2f(POS_X, Fonts::BEST_SCORE_Y_POS));
         (this->window).draw(text);
@@ -339,6 +363,12 @@ namespace gamestuff {
                 if (this->fallingShape->fall(this->field)){
                     // ++(this->scores);
                 }
+            } else if (key == sf::Keyboard::Space) {
+                while (this->fallingShape->fall(this->field)){
+                    // ++(this->scores);
+                }
+            } else if (key == sf::Keyboard::M) {
+                this->showShadow = !this->showShadow;
             }
         }
         if (key == sf::Keyboard::Escape) {

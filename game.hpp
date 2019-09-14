@@ -59,9 +59,11 @@ namespace gamestuff {
         sf::RenderWindow window;
         gamestuff::Shape *fallingShape;
         gamestuff::Shape *nextShape;
+        bool showShadow;
         std::vector<gamestuff::Shape*> shapes;
         sf::Font mainFont;
         std::vector<int> linesForDestroy;
+        std::list<std::vector<sf::Color>> emptyField;
         void createFields(void);
         void drawGameOnImage(void);
         void drawFields(void);
@@ -77,6 +79,7 @@ namespace gamestuff {
         void restartGame();
         inline void writeScoresInfoInTerminal(void) const;
         void keyPressed(const sf::Keyboard::Key &key);
+        void drawShadow(void);
       public:
         Game(void);
         ~Game();
